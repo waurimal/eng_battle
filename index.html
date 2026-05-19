@@ -1,438 +1,426 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>English Battle Royale</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --bg-color: #1a1a2e;
             --panel-bg: #16213e;
             --accent-neon: #0f3460;
             --text-main: #e94560;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --warning: #f1c40f;
+            --success: #4ade80;
+            --danger: #f87171;
+            --warning: #facc15;
         }
         body {
             background-color: var(--bg-color);
-            color: #fff;
+            color: white;
             font-family: 'Noto Sans KR', sans-serif;
             overflow-x: hidden;
-            touch-action: manipulation;
+            overscroll-behavior: none;
+            touch-action: pan-x pan-y;
         }
-        .font-game { font-family: 'Fredoka One', cursive, 'Noto Sans KR'; }
+        .font-game { font-family: 'Poppins', 'Noto Sans KR', sans-serif; }
+        .screen { display: none; width: 100%; min-height: 100vh; position: absolute; top: 0; left: 0; }
+        .screen.active { display: flex; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-        ::-webkit-scrollbar-thumb { background: #e94560; border-radius: 4px; }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px) rotate(-5deg); }
-            50% { transform: translateX(10px) rotate(5deg); }
-            75% { transform: translateX(-10px) rotate(-5deg); }
-        }
-        .animate-shake { animation: shake 0.5s ease-in-out; }
-        
-        @keyframes popup {
-            0% { transform: scale(0.5); opacity: 0; }
-            70% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-popup { animation: popup 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-50px); opacity: 0; }
-        }
-        .animate-float { animation: floatUp 1s ease-out forwards; }
-
-        @keyframes fireBorder {
-            0% { box-shadow: 0 0 10px #ff0000, inset 0 0 10px #ff0000; }
-            50% { box-shadow: 0 0 20px #ff7300, inset 0 0 20px #ff7300; }
-            100% { box-shadow: 0 0 10px #ff0000, inset 0 0 10px #ff0000; }
-        }
-        .combo-fire { animation: fireBorder 1s infinite alternate; border: 2px solid #ff7300; }
-
-        @keyframes dropDown {
-            0% { transform: translateY(-100vh) rotate(-10deg); opacity: 0; }
-            100% { transform: translateY(0) rotate(0); opacity: 1; }
-        }
-        .animate-drop { animation: dropDown 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-
-        /* Confetti */
-        .confetti {
-            position: absolute; width: 10px; height: 10px; background-color: #f00;
-            animation: fall 3s linear infinite;
-        }
-        @keyframes fall {
-            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-
-        /* Utility classes */
         .glass-panel {
             background: rgba(22, 33, 62, 0.8);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 1rem;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #e94560, #c0392b);
-            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
-            transition: all 0.2s;
-        }
-        .btn-primary:active:not(:disabled) { transform: scale(0.95); box-shadow: 0 2px 5px rgba(233, 69, 96, 0.4); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        
-        .btn-option {
-            background: #0f3460;
-            border: 2px solid #16213e;
-            transition: all 0.2s;
-        }
-        .btn-option.selected { border-color: #2ecc71; background: #1a4a38; transform: scale(0.98); }
-        .btn-option.correct { background: #2ecc71 !important; color: white !important; border-color: #27ae60 !important; }
-        .btn-option.wrong { background: #e74c3c !important; color: white !important; border-color: #c0392b !important; opacity: 0.7; }
-        
-        /* Progress Circle */
-        .progress-ring__circle {
-            transition: stroke-dashoffset 1s linear;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        /* Screen Management */
-        .screen { display: none; min-height: 100vh; width: 100%; padding: 1rem; }
-        .screen.active { display: flex; flex-direction: column; }
+        .btn-primary {
+            background: linear-gradient(135deg, #e94560, #d93850);
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(233, 69, 96, 0.6); }
+        .btn-primary:active:not(:disabled) { transform: translateY(1px); }
+        .btn-primary:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
+
+        .btn-option {
+            background: #0f3460;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .btn-option:active:not(:disabled) { transform: scale(0.98); }
+        .btn-option.selected { border-color: #e94560; background: #16213e; }
+        .btn-option.correct { background: var(--success); color: #000; border-color: var(--success); }
+        .btn-option.wrong { background: var(--danger); color: #000; border-color: var(--danger); opacity: 0.7; }
+
+        .hp-heart { font-size: 1.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transition: all 0.3s; }
+        .hp-heart.empty { filter: grayscale(1) opacity(0.3); }
+
+        .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         
-        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; }
-        .toast { background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; margin-bottom: 10px; font-weight: bold; animation: popup 0.3s forwards, floatUp 0.5s 2s forwards; }
+        .grid-players { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .player-card { background: #0f3460; border-radius: 10px; padding: 10px; text-align: center; border: 2px solid transparent; transition: all 0.3s; }
+        .player-card.full-hp { border-color: var(--success); }
+        .player-card.low-hp { border-color: var(--warning); }
+        .player-card.dead { filter: grayscale(1); opacity: 0.5; text-decoration: line-through; }
+
+        /* Animations */
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .anim-shake { animation: shake 0.4s ease-in-out; }
+        
+        @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        .anim-pop { animation: pop 0.4s ease-out forwards; }
+        
+        @keyframes float-up { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-50px); opacity: 0; } }
+        .anim-float-up { animation: float-up 1s ease-out forwards; }
+
+        @keyframes fire-border { 0% { box-shadow: 0 0 10px #ff0000, inset 0 0 10px #ff0000; } 50% { box-shadow: 0 0 20px #ff7300, inset 0 0 20px #ff7300; } 100% { box-shadow: 0 0 10px #ff0000, inset 0 0 10px #ff0000; } }
+        .combo-fire { animation: fire-border 1.5s infinite alternate; }
+
+        /* Timer Bar */
+        .timer-bar-container { width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden; margin-top: 10px; }
+        .timer-bar { height: 100%; background: var(--success); width: 100%; transition: width 1s linear, background-color 0.3s; }
+        .timer-bar.warning { background: var(--warning); }
+        .timer-bar.danger { background: var(--danger); }
+
+        /* Toast */
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 30px; font-weight: bold; transform: translateY(-20px); opacity: 0; transition: all 0.3s; }
+        .toast.show { transform: translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
+
     <div id="toast-container"></div>
 
-    <!-- SCREEN: ROLE SELECT -->
-    <div id="view-role-select" class="screen active items-center justify-center">
-        <div class="glass-panel p-10 text-center max-w-lg w-full">
-            <h1 class="text-5xl font-game text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 mb-2">English</h1>
-            <h2 class="text-4xl font-game text-white mb-8 shadow-black drop-shadow-lg">BATTLE ROYALE</h2>
-            <p class="text-gray-300 mb-8">초등학교 6학년 영단어/문법/듣기/독해 서바이벌!</p>
-            <div class="flex flex-col gap-4">
-                <button onclick="app.initTeacherSetup()" class="btn-primary py-4 rounded-xl font-bold text-xl flex items-center justify-center gap-2">
-                    <span class="text-2xl">?????</span> 선생님으로 방 만들기
-                </button>
-                <button onclick="app.initStudentJoin()" class="bg-[#0f3460] hover:bg-[#16213e] py-4 rounded-xl font-bold text-xl border border-blue-900 transition-transform active:scale-95 flex items-center justify-center gap-2">
-                    <span class="text-2xl">?????</span> 학생으로 참가하기
-                </button>
-            </div>
+    <div id="view-role-select" class="screen active flex-col items-center justify-center p-4">
+        <h1 class="text-5xl md:text-7xl font-game font-black text-center mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 drop-shadow-lg">ENGLISH<br>BATTLE ROYALE</h1>
+        <p class="text-gray-400 mb-12 text-center text-lg">최후의 1인이 되어 살아남으세요!</p>
+        
+        <div class="flex flex-col gap-6 w-full max-w-md">
+            <button onclick="app.showScreen('view-student-login')" class="btn-primary py-5 rounded-2xl font-bold text-2xl flex items-center justify-center gap-3">
+                <span class="text-3xl">🎮</span> 학생으로 참가하기
+            </button>
+            <button onclick="app.showScreen('view-teacher-setup')" class="bg-gray-800 hover:bg-gray-700 py-4 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 border border-gray-600 transition-colors">
+                <span class="text-2xl">👨‍🏫</span> 선생님으로 방 만들기
+            </button>
         </div>
     </div>
 
     <!-- SCREEN: TEACHER SETUP -->
-    <div id="view-teacher-setup" class="screen items-center justify-center">
-        <div class="glass-panel p-8 max-w-2xl w-full">
-            <h2 class="text-3xl font-game mb-6 text-center text-[#e94560]">?? 게임 설정</h2>
+    <div id="view-teacher-setup" class="screen flex-col items-center py-10 px-4 overflow-y-auto">
+        <h2 class="text-3xl font-game font-bold mb-6">게임 설정 (교사용)</h2>
+        <div class="glass-panel p-6 w-full max-w-2xl flex flex-col gap-6">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-gray-300 mb-2 text-sm">총 라운드 수 (문제 수)</label>
-                    <select id="t-setup-rounds" class="w-full bg-[#0f3460] text-white p-3 rounded-lg border border-gray-600 outline-none focus:border-[#e94560]">
+                    <label class="block text-gray-400 mb-2">라운드 수</label>
+                    <select id="t-setup-rounds" class="w-full bg-[#0f3460] text-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-[#e94560]">
                         <option value="3">3 라운드 (짧게)</option>
-                        <option value="5" selected>5 라운드 (기본)</option>
-                        <option value="10">10 라운드 (길게)</option>
+                        <option value="5" selected>5 라운드 (보통)</option>
+                        <option value="7">7 라운드 (길게)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-gray-300 mb-2 text-sm">문제당 제한 시간 (초)</label>
-                    <select id="t-setup-time" class="w-full bg-[#0f3460] text-white p-3 rounded-lg border border-gray-600 outline-none focus:border-[#e94560]">
+                    <label class="block text-gray-400 mb-2">문제당 시간</label>
+                    <select id="t-setup-time" class="w-full bg-[#0f3460] text-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-[#e94560]">
                         <option value="10">10초 (스피드)</option>
                         <option value="20" selected>20초 (기본)</option>
                         <option value="30">30초 (여유롭게)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-gray-300 mb-2 text-sm">학생 기본 HP (하트)</label>
-                    <select id="t-setup-hp" class="w-full bg-[#0f3460] text-white p-3 rounded-lg border border-gray-600 outline-none focus:border-[#e94560]">
-                        <option value="3" selected>3개</option>
-                        <option value="5">5개</option>
-                        <option value="10">10개</option>
+                    <label class="block text-gray-400 mb-2">학생 시작 HP</label>
+                    <select id="t-setup-hp" class="w-full bg-[#0f3460] text-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-[#e94560]">
+                        <option value="3">3개 (어려움)</option>
+                        <option value="5" selected>5개 (보통)</option>
+                        <option value="10">10개 (쉬움)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-gray-300 mb-2 text-sm">구제 찬스 (부활)</label>
-                    <select id="t-setup-rescue" class="w-full bg-[#0f3460] text-white p-3 rounded-lg border border-gray-600 outline-none focus:border-[#e94560]">
+                    <label class="block text-gray-400 mb-2">구제 찬스 (부활)</label>
+                    <select id="t-setup-rescue" class="w-full bg-[#0f3460] text-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-[#e94560]">
                         <option value="true" selected>ON (1회 부활 가능)</option>
-                        <option value="false">OFF (즉시 관전)</option>
+                        <option value="false">OFF (단판 승부)</option>
                     </select>
                 </div>
             </div>
 
-            <div class="mb-8">
-                <label class="block text-gray-300 mb-2 text-sm">포함할 문제 유형 (중복 선택 가능)</label>
+            <div>
+                <label class="block text-gray-400 mb-2">출제 영역 (복수 선택 가능)</label>
                 <div class="grid grid-cols-2 gap-3">
-                    <label class="flex items-center gap-2 bg-[#0f3460] p-3 rounded-lg cursor-pointer">
-                        <input type="checkbox" class="t-setup-type w-5 h-5 accent-[#e94560]" value="vocabulary" checked> Vocabulary
+                    <label class="flex items-center gap-3 bg-[#0f3460] p-3 rounded-xl cursor-pointer hover:bg-opacity-80">
+                        <input type="checkbox" value="vocabulary" class="t-setup-type w-5 h-5 accent-[#e94560]" checked> Vocabulary (단어)
                     </label>
-                    <label class="flex items-center gap-2 bg-[#0f3460] p-3 rounded-lg cursor-pointer">
-                        <input type="checkbox" class="t-setup-type w-5 h-5 accent-[#e94560]" value="grammar" checked> Grammar
+                    <label class="flex items-center gap-3 bg-[#0f3460] p-3 rounded-xl cursor-pointer hover:bg-opacity-80">
+                        <input type="checkbox" value="grammar" class="t-setup-type w-5 h-5 accent-[#e94560]" checked> Grammar (문법)
                     </label>
-                    <label class="flex items-center gap-2 bg-[#0f3460] p-3 rounded-lg cursor-pointer">
-                        <input type="checkbox" class="t-setup-type w-5 h-5 accent-[#e94560]" value="listening" checked> Listening
+                    <label class="flex items-center gap-3 bg-[#0f3460] p-3 rounded-xl cursor-pointer hover:bg-opacity-80">
+                        <input type="checkbox" value="listening" class="t-setup-type w-5 h-5 accent-[#e94560]" checked> Listening (듣기-TTS)
                     </label>
-                    <label class="flex items-center gap-2 bg-[#0f3460] p-3 rounded-lg cursor-pointer">
-                        <input type="checkbox" class="t-setup-type w-5 h-5 accent-[#e94560]" value="reading" checked> Reading
+                    <label class="flex items-center gap-3 bg-[#0f3460] p-3 rounded-xl cursor-pointer hover:bg-opacity-80">
+                        <input type="checkbox" value="reading" class="t-setup-type w-5 h-5 accent-[#e94560]" checked> Reading (독해)
                     </label>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-3">
-                <button onclick="app.createRoom()" class="btn-primary py-4 rounded-xl font-bold text-xl w-full">방 만들기 (로컬 멀티플레이)</button>
+            <div class="flex flex-col gap-3 mt-4">
+                <button onclick="app.createRoom()" class="btn-primary py-4 rounded-xl font-bold text-xl w-full">방 만들기 (온라인 멀티플레이)</button>
                 <button onclick="app.showScreen('view-role-select')" class="bg-transparent text-gray-400 py-2 hover:text-white">뒤로 가기</button>
             </div>
         </div>
     </div>
 
     <!-- SCREEN: TEACHER LOBBY -->
-    <div id="view-teacher-lobby" class="screen flex-col">
-        <div class="text-center mt-10 mb-8">
-            <h2 class="text-2xl text-gray-400 mb-2 font-game">학생 접속 코드</h2>
-            <div id="t-lobby-code" class="text-8xl font-game tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">----</div>
-            <p class="mt-4 text-xl text-gray-300">학생들은 위 코드를 입력하여 접속하세요!</p>
+    <div id="view-teacher-lobby" class="screen flex-col px-8 py-10">
+        <div class="text-center mb-10">
+            <h2 class="text-2xl text-gray-400 mb-2">학생들은 아래 코드로 접속하세요</h2>
+            <div class="text-8xl font-game font-black tracking-widest text-yellow-400 bg-gray-900 inline-block px-10 py-4 rounded-3xl border-4 border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.3)] select-all" id="t-lobby-code">ABCD</div>
         </div>
         
-        <div class="flex-1 glass-panel p-6 mx-auto w-full max-w-5xl flex flex-col">
-            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
-                <h3 class="text-2xl font-bold">접속한 학생 목록</h3>
-                <div class="text-xl bg-[#0f3460] px-4 py-2 rounded-full">총 인원: <span id="t-lobby-count" class="font-bold text-[#e94560]">0</span>명</div>
+        <div class="flex justify-between items-end mb-4">
+            <h3 class="text-2xl font-bold">참가자 <span id="t-lobby-count" class="text-[#e94560]">0</span>명</h3>
+            <div class="flex gap-4">
+                <button onclick="app.addBot()" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg font-bold transition-colors">🤖 봇 추가 (테스트용)</button>
+                <button id="t-btn-start" onclick="app.hostStartGame()" class="btn-primary px-8 py-3 rounded-xl font-bold text-xl" disabled>게임 시작</button>
             </div>
-            
-            <div id="t-lobby-players" class="flex-1 overflow-y-auto grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-4 content-start">
-                <!-- Players will be rendered here -->
-            </div>
-            
-            <div class="mt-6 flex gap-4">
-                <button onclick="app.addDemoBots()" class="bg-purple-600 hover:bg-purple-700 py-4 px-6 rounded-xl font-bold text-lg transition flex-1">?? 봇 추가 (테스트용)</button>
-                <button id="btn-start-game" onclick="app.startGame()" class="btn-primary py-4 px-6 rounded-xl font-bold text-2xl flex-[2]" disabled>게임 시작!</button>
+        </div>
+        
+        <div class="glass-panel p-6 flex-1 overflow-y-auto">
+            <div id="t-lobby-players" class="grid-players">
+                <!-- Players will appear here -->
+                <div class="text-gray-500 col-span-full text-center py-10">학생들이 접속하기를 기다리는 중...</div>
             </div>
         </div>
     </div>
 
     <!-- SCREEN: TEACHER GAME -->
-    <div id="view-teacher-game" class="screen flex-col">
-        <!-- Header: Stats & Timer -->
-        <div class="flex justify-between items-center mb-4 glass-panel p-4">
-            <div class="text-2xl font-bold">Round <span id="t-game-round" class="text-yellow-400">1</span> / <span id="t-game-total-rounds">5</span></div>
-            <div class="flex items-center gap-4">
-                <div class="text-xl">생존자: <span id="t-game-survivors" class="text-green-400 font-bold">0</span></div>
-                <div class="relative w-20 h-20 flex items-center justify-center">
-                    <svg class="absolute top-0 left-0 w-full h-full" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="45" fill="none" stroke="#333" stroke-width="10"></circle>
-                        <circle id="t-game-timer-ring" cx="50" cy="50" r="45" fill="none" stroke="#e94560" stroke-width="10" class="progress-ring__circle" stroke-dasharray="283" stroke-dashoffset="0"></circle>
-                    </svg>
-                    <span id="t-game-timer" class="text-3xl font-game absolute">20</span>
+    <div id="view-teacher-game" class="screen flex-col p-6">
+        <div class="flex justify-between items-center mb-6">
+            <div class="text-2xl font-game font-bold">Round <span id="t-game-round">1</span><span class="text-gray-400 text-lg"> / <span id="t-game-total-rounds">5</span></span></div>
+            <div class="text-xl bg-[#0f3460] px-4 py-2 rounded-full border border-blue-500">생존자: <span id="t-game-alive" class="font-bold text-yellow-400">0</span>명</div>
+            <button onclick="if(confirm('게임을 강제 종료하시겠습니까?')) location.reload()" class="bg-gray-800 text-sm px-4 py-2 rounded-lg hover:bg-red-600">종료</button>
+        </div>
+
+        <div class="glass-panel p-10 mb-6 text-center flex-1 flex flex-col justify-center relative">
+            <!-- Phase Overlay -->
+            <div id="t-game-overlay" class="absolute inset-0 bg-black/80 rounded-xl flex items-center justify-center z-10 hidden">
+                <h1 id="t-game-overlay-text" class="text-8xl font-game font-black anim-pop text-yellow-400">3</h1>
+            </div>
+
+            <div id="t-game-type-badge" class="inline-block mx-auto px-4 py-1 rounded-full text-sm font-bold bg-blue-600 mb-4 uppercase tracking-wider">Grammar</div>
+            
+            <h2 id="t-game-question" class="text-4xl md:text-5xl font-bold leading-tight mb-8">Loading...</h2>
+            
+            <!-- TTS Button for Listening -->
+            <button id="t-btn-tts" onclick="app.playTTS()" class="hidden mx-auto bg-green-600 hover:bg-green-500 text-white font-bold py-4 px-8 rounded-full text-2xl shadow-lg mb-8 items-center gap-3">
+                <span>🔊</span> 문제 듣기 (남은 횟수: <span id="t-tts-count">2</span>)
+            </button>
+
+            <!-- Options Grid (Teacher view) -->
+            <div id="t-game-options" class="grid grid-cols-2 gap-4 max-w-4xl mx-auto w-full opacity-50 pointer-events-none mb-6">
+                <div class="btn-option p-4 rounded-xl text-2xl font-bold">Option 1</div>
+                <div class="btn-option p-4 rounded-xl text-2xl font-bold">Option 2</div>
+                <div class="btn-option p-4 rounded-xl text-2xl font-bold">Option 3</div>
+                <div class="btn-option p-4 rounded-xl text-2xl font-bold">Option 4</div>
+            </div>
+            
+            <div class="mt-auto">
+                <div class="flex justify-between text-gray-400 mb-2 font-game text-xl">
+                    <span>시간 제한</span>
+                    <span id="t-game-time-text">20s</span>
+                </div>
+                <div class="timer-bar-container h-4">
+                    <div id="t-game-timer-bar" class="timer-bar"></div>
                 </div>
             </div>
         </div>
-        
-        <!-- Question Area -->
-        <div class="glass-panel p-10 mb-4 flex-1 flex flex-col items-center justify-center text-center relative">
-            <div id="t-game-type-badge" class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wide">GRAMMAR</div>
-            
-            <!-- Big countdown before question -->
-            <div id="t-game-big-countdown" class="hidden absolute inset-0 bg-black/80 flex items-center justify-center z-10 rounded-xl backdrop-blur-sm">
-                <span id="t-game-big-countdown-num" class="text-9xl font-game text-yellow-400 animate-popup">3</span>
-            </div>
 
-            <!-- Reading Passage -->
-            <div id="t-game-passage" class="hidden text-xl text-gray-300 mb-6 max-w-3xl bg-[#0f3460] p-6 rounded-xl text-left border-l-4 border-cyan-400 leading-relaxed"></div>
-            
-            <h2 id="t-game-question" class="text-4xl md:text-5xl font-bold mb-8 leading-tight">Question goes here?</h2>
-            
-            <button id="t-game-tts-btn" onclick="app.playTTS()" class="hidden bg-cyan-500 hover:bg-cyan-600 text-white rounded-full p-4 mb-6 shadow-lg animate-bounce cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 12h4l4-4v12l-4-4H5a2 2 0 01-2-2v-4a2 2 0 012-2z" /></svg>
-                <span class="block text-xs mt-1">듣기 (<span id="t-game-tts-count">2</span>)</span>
-            </button>
-
-            <!-- Options (Teacher view only shows them, not clickable) -->
-            <div id="t-game-options" class="grid grid-cols-2 gap-4 w-full max-w-4xl">
-                <!-- Buttons injected by JS -->
+        <!-- Controls & Stats -->
+        <div class="flex gap-6 h-48">
+            <div class="glass-panel p-4 flex-1 overflow-y-auto">
+                <h3 class="text-sm text-gray-400 mb-2">학생 상태 현황</h3>
+                <div id="t-game-player-grid" class="grid-players text-sm">
+                    <!-- Player status cards -->
+                </div>
             </div>
-            
-            <!-- Answer Explanation (Hidden until reveal) -->
-            <div id="t-game-explanation" class="hidden mt-6 bg-green-900/50 border border-green-500 p-4 rounded-xl w-full max-w-4xl text-lg text-green-200">
-                해설이 여기에 표시됩니다.
+            <div class="w-64 flex flex-col justify-center gap-4">
+                <div id="t-game-stats" class="hidden bg-[#0f3460] p-4 rounded-xl text-center">
+                    <div class="text-sm text-gray-400">정답 제출 현황</div>
+                    <div class="text-3xl font-game font-bold"><span id="t-game-submitted">0</span> / <span id="t-game-total-players">0</span></div>
+                </div>
+                <button id="t-btn-reveal" onclick="app.hostRevealAnswer()" class="btn-primary py-4 rounded-xl font-bold text-xl hidden">정답 공개</button>
+                <button id="t-btn-next" onclick="app.hostNextQuestion()" class="bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-xl hidden">다음 문제 ➔</button>
             </div>
-        </div>
-
-        <!-- Player HP Grid -->
-        <div class="h-48 glass-panel p-4 overflow-y-auto">
-            <div id="t-game-hp-grid" class="flex flex-wrap gap-3">
-                <!-- HP items injected by JS -->
-            </div>
-        </div>
-        
-        <!-- Controls -->
-        <div class="mt-4 flex justify-center gap-4">
-            <button id="t-btn-reveal" onclick="app.revealAnswer()" class="btn-primary py-3 px-8 rounded-xl font-bold hidden">정답 공개</button>
-            <button id="t-btn-next" onclick="app.nextRound()" class="bg-blue-600 hover:bg-blue-700 py-3 px-8 rounded-xl font-bold hidden text-white">다음 라운드 ?</button>
         </div>
     </div>
 
     <!-- SCREEN: TEACHER RESULTS -->
-    <div id="view-teacher-results" class="screen flex-col items-center py-10 relative overflow-hidden">
-        <div id="confetti-container" class="absolute inset-0 pointer-events-none z-0"></div>
+    <div id="view-teacher-results" class="screen flex-col items-center justify-center py-10 px-4 relative overflow-hidden">
+        <div id="fireworks-container" class="absolute inset-0 pointer-events-none z-0"></div>
         
-        <h1 class="text-6xl font-game text-yellow-400 mb-2 z-10 animate-drop">WINNER</h1>
-        <h2 id="t-res-winner-name" class="text-4xl font-bold mb-10 z-10 text-white drop-shadow-lg">챔피언 이름</h2>
-        
-        <div class="flex items-end justify-center gap-4 mb-12 h-64 z-10">
-            <!-- 2nd -->
-            <div class="flex flex-col items-center animate-popup" style="animation-delay: 0.6s;">
-                <div id="t-res-p2" class="text-xl font-bold mb-2">2nd</div>
-                <div class="w-24 bg-gray-400 h-32 rounded-t-lg flex justify-center pt-2 text-2xl">??</div>
-            </div>
-            <!-- 1st -->
-            <div class="flex flex-col items-center animate-popup" style="animation-delay: 0.3s;">
-                <div id="t-res-p1" class="text-2xl font-bold text-yellow-300 mb-2">1st</div>
-                <div class="w-32 bg-yellow-500 h-48 rounded-t-lg flex justify-center pt-2 text-4xl shadow-[0_0_30px_rgba(255,215,0,0.5)]">??</div>
-            </div>
-            <!-- 3rd -->
-            <div class="flex flex-col items-center animate-popup" style="animation-delay: 0.9s;">
-                <div id="t-res-p3" class="text-xl font-bold mb-2">3rd</div>
-                <div class="w-24 bg-orange-700 h-24 rounded-t-lg flex justify-center pt-2 text-2xl">??</div>
-            </div>
-        </div>
+        <h1 class="text-6xl font-game font-black text-yellow-400 mb-2 z-10 anim-pop">GAME OVER</h1>
+        <p class="text-xl text-gray-300 mb-10 z-10">최후의 생존자 및 최종 순위</p>
 
-        <div class="glass-panel p-6 w-full max-w-4xl z-10">
-            <h3 class="text-2xl font-bold mb-4 border-b border-gray-600 pb-2">전체 순위표</h3>
-            <div class="max-h-60 overflow-y-auto">
+        <div class="glass-panel p-8 w-full max-w-4xl z-10 mb-8">
+            <div class="flex flex-col md:flex-row items-end justify-center gap-4 h-64 border-b border-gray-700 pb-4 mb-6">
+                <!-- Podium 2 -->
+                <div class="flex flex-col items-center w-1/3 opacity-0" id="podium-2">
+                    <div class="text-2xl font-bold truncate w-full text-center" id="podium-2-name">-</div>
+                    <div class="w-12 h-12 rounded-full bg-gray-600 mb-2" id="podium-2-avatar"></div>
+                    <div class="w-full bg-gray-400 h-24 rounded-t-lg flex items-start justify-center pt-2 text-2xl font-black text-gray-800">2</div>
+                </div>
+                <!-- Podium 1 -->
+                <div class="flex flex-col items-center w-1/3 opacity-0" id="podium-1">
+                    <div class="text-3xl font-bold text-yellow-400 truncate w-full text-center mb-1 anim-pop" id="podium-1-name">-</div>
+                    <div class="w-16 h-16 rounded-full bg-yellow-600 mb-2 shadow-[0_0_20px_rgba(250,204,21,0.5)]" id="podium-1-avatar"></div>
+                    <div class="w-full bg-yellow-500 h-36 rounded-t-lg flex items-start justify-center pt-2 text-4xl font-black text-yellow-900">1</div>
+                </div>
+                <!-- Podium 3 -->
+                <div class="flex flex-col items-center w-1/3 opacity-0" id="podium-3">
+                    <div class="text-xl font-bold text-orange-300 truncate w-full text-center" id="podium-3-name">-</div>
+                    <div class="w-10 h-10 rounded-full bg-orange-800 mb-2" id="podium-3-avatar"></div>
+                    <div class="w-full bg-orange-700 h-16 rounded-t-lg flex items-start justify-center pt-2 text-xl font-black text-orange-950">3</div>
+                </div>
+            </div>
+
+            <div class="max-h-60 overflow-y-auto pr-2">
                 <table class="w-full text-left">
                     <thead class="text-gray-400 sticky top-0 bg-[#16213e]">
-                        <tr><th class="p-2">순위</th><th class="p-2">이름</th><th class="p-2">생존 라운드</th><th class="p-2">점수</th></tr>
+                        <tr>
+                            <th class="py-2">순위</th>
+                            <th>이름</th>
+                            <th class="text-center">생존 라운드</th>
+                            <th class="text-right">점수</th>
+                        </tr>
                     </thead>
-                    <tbody id="t-res-leaderboard">
-                        <!-- Rows injected by JS -->
+                    <tbody id="t-res-leaderboard" class="divide-y divide-gray-700">
+                        <!-- Leaderboard rows -->
                     </tbody>
                 </table>
             </div>
         </div>
-        
-        <button onclick="location.reload()" class="btn-primary py-4 px-10 rounded-xl font-bold text-xl mt-8 z-10">메인으로 돌아가기</button>
+
+        <button onclick="location.reload()" class="btn-primary py-4 px-12 rounded-xl font-bold text-2xl z-10">처음으로 돌아가기</button>
     </div>
 
-    <!-- SCREEN: STUDENT JOIN -->
-    <div id="view-student-join" class="screen items-center justify-center">
-        <div class="glass-panel p-8 max-w-sm w-full text-center">
-            <h2 class="text-3xl font-game text-[#e94560] mb-6">게임 참가</h2>
-            
-            <input type="text" id="s-join-code" placeholder="방 코드 (4자리)" class="w-full bg-[#0f3460] text-white text-center text-3xl font-game p-4 rounded-xl mb-4 border-2 border-transparent focus:border-[#e94560] outline-none uppercase" maxlength="4">
-            
-            <input type="text" id="s-join-name" placeholder="닉네임 (최대 6자)" class="w-full bg-[#0f3460] text-white text-center text-xl p-4 rounded-xl mb-6 border-2 border-transparent focus:border-[#e94560] outline-none" maxlength="6">
-            
-            <div class="mb-6">
-                <p class="text-gray-400 mb-2 text-sm">아바타 색상 선택</p>
-                <div class="grid grid-cols-4 gap-2" id="s-join-colors">
-                    <div class="color-btn w-10 h-10 rounded-full cursor-pointer border-2 border-transparent mx-auto bg-[#FF6B6B]" data-color="#FF6B6B" onclick="app.selectColor(this)"></div>
-                    <div class="color-btn w-10 h-10 rounded-full cursor-pointer border-2 border-transparent mx-auto bg-[#4ECDC4]" data-color="#4ECDC4" onclick="app.selectColor(this)"></div>
-                    <div class="color-btn w-10 h-10 rounded-full cursor-pointer border-2 border-transparent mx-auto bg-[#45B7D1]" data-color="#45B7D1" onclick="app.selectColor(this)"></div>
-                    <div class="color-btn w-10 h-10 rounded-full cursor-pointer border-2 border-transparent mx-auto bg-[#F9CA24]" data-color="#F9CA24" onclick="app.selectColor(this)"></div>
-                    <div class="color-btn w-10 h-10 rounded-full cursor-pointer border-2 border-transparent mx-auto bg-[#6C5CE7]" data-color="#6C5CE7" onclick="app.selectColor(this)"></div>
-                    <div class="color-btn w-10 h-10 rounded-full cursor-pointer border-2 border-transparent mx-auto bg-[#A8E6CF]" data-color="#A8E6CF" onclick="app.selectColor(this)"></div>
-                    <div class="color-btn w-10 h-10 rounded-full cursor-pointer border-2 border-transparent mx-auto bg-[#FF8ED4]" data-color="#FF8ED4" onclick="app.selectColor(this)"></div>
-                    <div class="color-btn w-10 h-10 rounded-full cursor-pointer border-2 border-transparent mx-auto bg-[#FAD390]" data-color="#FAD390" onclick="app.selectColor(this)"></div>
-                </div>
+    <!-- SCREEN: STUDENT LOGIN -->
+    <div id="view-student-login" class="screen flex-col items-center justify-center p-4">
+        <h2 class="text-4xl font-game font-bold mb-8 text-center">게임 참가하기</h2>
+        
+        <div class="glass-panel p-6 w-full max-w-sm flex flex-col gap-5">
+            <div>
+                <label class="block text-gray-400 mb-2 text-sm">선생님이 알려준 룸 코드 (4자리)</label>
+                <input type="text" id="s-login-code" maxlength="4" placeholder="ABCD" class="w-full bg-gray-900 text-white p-4 rounded-xl text-center text-3xl font-game font-black tracking-widest uppercase outline-none focus:ring-2 focus:ring-[#e94560]" style="text-transform: uppercase;">
             </div>
             
-            <button onclick="app.joinRoom()" class="btn-primary py-4 w-full rounded-xl font-bold text-xl mb-4">입장하기</button>
+            <div>
+                <label class="block text-gray-400 mb-2 text-sm">내 이름 (닉네임)</label>
+                <input type="text" id="s-login-name" maxlength="6" placeholder="홍길동" class="w-full bg-gray-900 text-white p-4 rounded-xl text-center text-xl font-bold outline-none focus:ring-2 focus:ring-[#e94560]">
+            </div>
+
+            <div>
+                <label class="block text-gray-400 mb-2 text-sm text-center">아바타 색상</label>
+                <div class="flex justify-center gap-2 flex-wrap" id="s-login-colors">
+                    <!-- Colors injected by JS -->
+                </div>
+            </div>
+
+            <button onclick="app.studentJoin()" class="btn-primary py-4 mt-2 rounded-xl font-bold text-xl w-full">입장하기</button>
             <button onclick="app.showScreen('view-role-select')" class="bg-transparent text-gray-400 py-2 hover:text-white">뒤로 가기</button>
         </div>
     </div>
 
     <!-- SCREEN: STUDENT LOBBY -->
-    <div id="view-student-lobby" class="screen items-center justify-center flex-col">
-        <div class="w-24 h-24 rounded-full mb-4 border-4 border-white flex items-center justify-center text-4xl shadow-[0_0_20px_currentColor]" id="s-lobby-avatar"></div>
-        <h2 class="text-3xl font-bold mb-2" id="s-lobby-name">홍길동</h2>
-        <p class="text-xl text-gray-400 mb-8">대기실에 입장했습니다!</p>
+    <div id="view-student-lobby" class="screen flex-col items-center justify-center p-6 text-center">
+        <div class="w-24 h-24 rounded-full flex items-center justify-center text-4xl mb-4 font-bold shadow-lg" id="s-lobby-avatar"></div>
+        <h2 class="text-3xl font-bold mb-2" id="s-lobby-name">이름</h2>
+        <div class="inline-block bg-gray-800 text-yellow-400 px-4 py-1 rounded-full font-game font-bold tracking-widest mb-8">ROOM: <span id="s-lobby-room"></span></div>
         
-        <div class="glass-panel p-6 text-center animate-pulse">
-            <div class="text-5xl mb-4">?</div>
-            <h3 class="text-xl font-bold text-yellow-400">선생님이 게임을 시작할 때까지<br>기다려 주세요...</h3>
-        </div>
-    </div>
-
-    <!-- SCREEN: STUDENT GAME -->
-    <div id="view-student-game" class="screen flex-col bg-[#1a1a2e]">
-        <!-- HUD -->
-        <div class="flex justify-between items-center bg-[#16213e] p-3 rounded-xl mb-4 shadow-lg border border-gray-700">
-            <div class="flex items-center gap-2">
-                <div id="s-game-avatar" class="w-10 h-10 rounded-full border-2 border-white"></div>
-                <div class="flex flex-col">
-                    <span id="s-game-name" class="font-bold text-sm">이름</span>
-                    <div id="s-game-hp" class="text-sm tracking-widest">??????</div>
-                </div>
-            </div>
-            <div class="text-right">
-                <div id="s-game-score" class="font-game text-xl text-yellow-400">0 pt</div>
-                <div id="s-game-combo" class="text-xs text-orange-400 font-bold opacity-0 transition-opacity">?? 2 COMBO!</div>
-            </div>
-        </div>
-
-        <!-- Big countdown overlay -->
-        <div id="s-game-big-countdown" class="hidden absolute inset-0 bg-black/90 flex items-center justify-center z-50">
-            <span id="s-game-big-countdown-num" class="text-[150px] font-game text-yellow-400 animate-popup">3</span>
-        </div>
-
-        <!-- Question Area -->
-        <div class="flex-1 flex flex-col items-center justify-center">
-            <div class="w-full mb-4 relative flex justify-center">
-                <svg class="w-16 h-16" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="#333" stroke-width="10"></circle>
-                    <circle id="s-game-timer-ring" cx="50" cy="50" r="45" fill="none" stroke="#22d3ee" stroke-width="10" class="progress-ring__circle" stroke-dasharray="283" stroke-dashoffset="0"></circle>
-                </svg>
-                <span id="s-game-timer" class="absolute inset-0 flex items-center justify-center text-xl font-bold">20</span>
-            </div>
-
-            <!-- Listening Info (Student sees instruction instead of text) -->
-            <div id="s-game-listening-info" class="hidden bg-blue-900/50 p-4 rounded-xl text-center mb-6 w-full border border-blue-500 animate-pulse">
-                ?? 선생님이 들려주는 음성을 잘 들으세요!
-            </div>
-
-            <div id="s-game-question-box" class="bg-[#16213e] p-6 rounded-2xl w-full text-center shadow-xl mb-6 min-h-[120px] flex items-center justify-center border-t-4 border-[#e94560]">
-                <h2 id="s-game-question" class="text-xl md:text-2xl font-bold">Question here?</h2>
-            </div>
-            
-            <div id="s-game-options" class="grid grid-cols-1 gap-3 w-full max-w-md">
-                <!-- Buttons injected by JS -->
-            </div>
-        </div>
-
-        <!-- Items Area -->
-        <div class="mt-4 flex justify-center gap-3">
-            <button id="btn-item-shield" onclick="app.useItem('shield')" class="bg-gray-700 p-3 rounded-full text-2xl relative opacity-50 hidden">???<span class="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">1</span></button>
+        <div class="glass-panel p-8 w-full max-w-sm">
+            <div class="animate-pulse text-6xl mb-4">⏳</div>
+            <h3 class="text-xl font-bold mb-2">대기실 입장 완료!</h3>
+            <p class="text-gray-400">선생님이 게임을 시작할 때까지<br>잠시만 기다려주세요.</p>
         </div>
     </div>
 
     <!-- SCREEN: STUDENT DEAD -->
-    <div id="view-student-dead" class="screen flex-col items-center justify-center relative overflow-hidden">
-        <div class="absolute inset-0 bg-red-900/20 pointer-events-none"></div>
-        <h1 class="text-7xl font-game text-red-500 mb-4 animate-drop drop-shadow-[0_0_20px_rgba(255,0,0,0.8)]">WASTED</h1>
-        <p class="text-xl text-gray-300 mb-8">체력을 모두 잃었습니다.</p>
+    <div id="view-student-dead" class="screen flex-col items-center justify-center p-6 text-center bg-red-900/40 relative">
+        <h1 class="text-6xl font-game font-black text-red-500 mb-4 anim-pop">탈락!</h1>
+        <p class="text-xl text-gray-200 mb-8">HP가 모두 소진되었습니다.</p>
         
-        <div class="glass-panel p-6 w-full max-w-sm text-center z-10">
-            <h3 class="font-bold mb-4 text-yellow-400">관전 모드</h3>
-            <p>현재 생존자: <span id="s-dead-survivors" class="font-bold text-white text-xl">0</span>명</p>
-            <p class="text-sm text-gray-400 mt-2">게임이 끝날 때까지 친구들을 응원해주세요!</p>
-            
-            <div class="flex justify-center gap-4 mt-6">
-                <button onclick="app.sendEmoji('??')" class="text-3xl hover:scale-125 transition">??</button>
-                <button onclick="app.sendEmoji('??')" class="text-3xl hover:scale-125 transition">??</button>
-                <button onclick="app.sendEmoji('??')" class="text-3xl hover:scale-125 transition">??</button>
+        <div class="glass-panel p-6 w-full max-w-sm bg-black/60">
+            <h3 class="text-gray-400 mb-4">관전 모드</h3>
+            <div class="flex justify-between items-center bg-gray-800 p-4 rounded-xl mb-6">
+                <span>현재 생존자</span>
+                <span class="text-2xl font-game font-bold text-yellow-400" id="s-dead-alive-count">0</span>
             </div>
+            
+            <div class="text-sm text-gray-400 mb-2">응원하기</div>
+            <div class="flex justify-center gap-4 text-3xl">
+                <button onclick="app.studentSendEmoji('👏')" class="hover:scale-125 transition-transform">👏</button>
+                <button onclick="app.studentSendEmoji('🔥')" class="hover:scale-125 transition-transform">🔥</button>
+                <button onclick="app.studentSendEmoji('💪')" class="hover:scale-125 transition-transform">💪</button>
+                <button onclick="app.studentSendEmoji('😭')" class="hover:scale-125 transition-transform">😭</button>
+            </div>
+        </div>
+
+        <div id="s-rescue-container" class="mt-8 hidden">
+            <p class="text-yellow-400 font-bold mb-2 anim-pulse">구제 찬스가 있습니다!</p>
+            <button onclick="app.studentAttemptRescue()" class="bg-yellow-500 text-black hover:bg-yellow-400 py-3 px-8 rounded-xl font-bold text-lg shadow-[0_0_15px_rgba(250,204,21,0.5)] anim-shake">부활 문제 도전하기</button>
+        </div>
+    </div>
+
+    <!-- SCREEN: STUDENT GAME -->
+    <div id="view-student-game" class="screen flex-col p-4">
+        <!-- HUD -->
+        <div class="flex justify-between items-center mb-4 glass-panel p-3">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" id="s-game-avatar"></div>
+                <div>
+                    <div class="text-xs text-gray-400" id="s-game-name">이름</div>
+                    <div class="text-sm font-bold font-game"><span id="s-game-score">0</span> pts</div>
+                </div>
+            </div>
+            <div class="flex flex-col items-end">
+                <div class="flex gap-1" id="s-game-hp">
+                    <!-- Hearts -->
+                </div>
+                <div id="s-game-combo" class="text-xs font-bold text-orange-400 hidden mt-1">🔥 2 COMBO (x1.5)</div>
+            </div>
+        </div>
+
+        <!-- Question Area -->
+        <div class="glass-panel p-6 flex-1 flex flex-col mb-4 relative" id="s-game-panel">
+            <!-- Phase Overlay (Student) -->
+            <div id="s-game-overlay" class="absolute inset-0 bg-black/90 rounded-xl flex items-center justify-center z-10 hidden flex-col">
+                <div id="s-game-overlay-icon" class="text-6xl mb-4"></div>
+                <h1 id="s-game-overlay-text" class="text-4xl font-game font-black text-center px-4 leading-tight">준비!</h1>
+            </div>
+
+            <div class="flex justify-between text-xs text-gray-400 mb-4">
+                <span class="bg-[#0f3460] px-2 py-1 rounded" id="s-game-type">Grammar</span>
+                <span id="s-game-round-info">Round 1</span>
+            </div>
+
+            <div class="text-center flex-1 flex items-center justify-center">
+                <h2 id="s-game-question" class="text-2xl md:text-3xl font-bold leading-snug break-keep">선생님 화면을 주목하세요!</h2>
+            </div>
+            
+            <div class="timer-bar-container h-2 mt-4">
+                <div id="s-game-timer-bar" class="timer-bar"></div>
+            </div>
+        </div>
+
+        <!-- Action Area (Options) -->
+        <div class="grid grid-cols-1 gap-3 h-64" id="s-game-options">
+            <button class="btn-option p-4 rounded-xl text-lg md:text-xl font-bold shadow-md break-words" onclick="app.studentAnswer(0)" id="s-opt-0">A</button>
+            <button class="btn-option p-4 rounded-xl text-lg md:text-xl font-bold shadow-md break-words" onclick="app.studentAnswer(1)" id="s-opt-1">B</button>
+            <button class="btn-option p-4 rounded-xl text-lg md:text-xl font-bold shadow-md break-words" onclick="app.studentAnswer(2)" id="s-opt-2">C</button>
+            <button class="btn-option p-4 rounded-xl text-lg md:text-xl font-bold shadow-md break-words" onclick="app.studentAnswer(3)" id="s-opt-3">D</button>
         </div>
     </div>
 
@@ -440,112 +428,164 @@
     <div id="view-student-results" class="screen flex-col items-center py-10">
         <h2 class="text-4xl font-game text-white mb-2">게임 종료!</h2>
         <div class="glass-panel p-8 w-full max-w-md text-center mt-6">
-            <div class="w-24 h-24 mx-auto rounded-full mb-4 flex items-center justify-center text-4xl bg-gray-700" id="s-res-avatar"></div>
+            <div class="w-24 h-24 mx-auto rounded-full mb-4 flex items-center justify-center text-4xl shadow-lg" id="s-res-avatar"></div>
             <h3 id="s-res-name" class="text-2xl font-bold mb-6">내 이름</h3>
             
             <div class="grid grid-cols-2 gap-4 text-left">
                 <div class="bg-[#0f3460] p-4 rounded-xl">
                     <div class="text-gray-400 text-sm">최종 순위</div>
-                    <div class="text-3xl font-game text-yellow-400" id="s-res-rank">1위</div>
+                    <div class="text-3xl font-game font-black text-yellow-400" id="s-res-rank">-위</div>
                 </div>
                 <div class="bg-[#0f3460] p-4 rounded-xl">
                     <div class="text-gray-400 text-sm">획득 점수</div>
-                    <div class="text-3xl font-game text-cyan-400" id="s-res-score">150</div>
+                    <div class="text-3xl font-game font-bold text-cyan-400" id="s-res-score">0</div>
                 </div>
             </div>
             
-            <button onclick="location.reload()" class="btn-primary py-3 w-full rounded-xl font-bold text-lg mt-8">처음으로</button>
+            <button onclick="location.reload()" class="btn-primary py-4 w-full rounded-xl font-bold text-xl mt-8">처음으로</button>
         </div>
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBuHd7prNT0ePPxTJxpt03GdvK69pEgM9I",
+            authDomain: "engbattle-83ab2.firebaseapp.com",
+            projectId: "engbattle-83ab2",
+            storageBucket: "engbattle-83ab2.firebasestorage.app",
+            messagingSenderId: "163801272841",
+            appId: "1:163801272841:web:f2e5a96a1cb8e230301ed8",
+            measurementId: "G-Q3CN2BG75K"
+        };
+
+        const fApp = initializeApp(firebaseConfig);
+        const auth = getAuth(fApp);
+        const db = getFirestore(fApp);
+
+        // Make Firebase accessible globally for the main script
+        window.fDb = db;
+        window.fAuth = auth;
+        window.fDoc = doc;
+        window.fSetDoc = setDoc;
+        window.fOnSnapshot = onSnapshot;
+        window.fAppId = typeof __app_id !== 'undefined' ? __app_id : 'engbattle';
+
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                console.log("Firebase Auth Success");
+            } catch (error) {
+                console.error("Auth error:", error);
+            }
+        }
+        initAuth();
+    </script>
 
     <script>
         // 40 Questions Data (Embedded JSON)
         const questionsData = {
-            vocabulary: [
-                { id: "v1", question: "What does 'curious' mean?", options: ["행복한", "궁금한", "슬픈", "화난"], answer: 1, explanation: "'Curious'는 무언가를 알고 싶어 하는 '궁금한, 호기심 있는'이라는 뜻입니다." },
-                { id: "v2", question: "'고대의, 옛날의'를 뜻하는 영어 단어는?", options: ["modern", "ancient", "future", "recent"], answer: 1, explanation: "'Ancient'는 아주 오래된 '고대의'라는 뜻입니다." },
-                { id: "v3", question: "What does 'environment' mean?", options: ["환경", "우주", "학교", "가족"], answer: 0, explanation: "'Environment'는 우리를 둘러싼 '환경'을 의미합니다." },
-                { id: "v4", question: "'제안하다'를 뜻하는 단어는?", options: ["refuse", "suggest", "forget", "accept"], answer: 1, explanation: "'Suggest'는 아이디어나 계획을 '제안하다'라는 뜻입니다." },
-                { id: "v5", question: "What does 'enormous' mean?", options: ["아주 작은", "보통의", "거대한", "귀여운"], answer: 2, explanation: "'Enormous'는 크기나 양이 아주 큰 '거대한'이라는 뜻입니다." },
-                { id: "v6", question: "'망설이다'를 영어로 하면?", options: ["decide", "hesitate", "hurry", "stop"], answer: 1, explanation: "'Hesitate'는 결정을 내리지 못하고 '망설이다'라는 뜻입니다." },
-                { id: "v7", question: "What does 'brief' mean?", options: ["짧은", "긴", "어려운", "쉬운"], answer: 0, explanation: "'Brief'는 시간이나 글이 '짧은, 간단한'이라는 뜻입니다." },
-                { id: "v8", question: "'인공적인'을 뜻하는 단어는?", options: ["natural", "real", "artificial", "magic"], answer: 2, explanation: "'Artificial'은 사람이 만든 '인공적인'이라는 뜻입니다." },
-                { id: "v9", question: "What does 'complicated' mean?", options: ["단순한", "복잡한", "재미있는", "지루한"], answer: 1, explanation: "'Complicated'는 이해하기 '복잡한'이라는 뜻입니다." },
-                { id: "v10", question: "'필수적인'을 뜻하는 단어는?", options: ["essential", "optional", "useless", "extra"], answer: 0, explanation: "'Essential'은 꼭 필요한 '필수적인'이라는 뜻입니다." }
+            "vocabulary": [
+                { id: "v1", question: "What does 'curious' mean?", options: ["행복한", "궁금한", "슬픈", "화난"], answer: 1, text: "'Curious' means wanting to know or learn something." },
+                { id: "v2", question: "Which word means '매우 큰'?", options: ["Tiny", "Small", "Huge", "Short"], answer: 2, text: "'Huge' means very large." },
+                { id: "v3", question: "What is the opposite of 'expensive'?", options: ["Cheap", "Rich", "Poor", "Fast"], answer: 0, text: "반대말은 '싼(Cheap)'입니다." },
+                { id: "v4", question: "Choose the correct spelling:", options: ["Beutiful", "Beautiful", "Beatifull", "Beauitful"], answer: 1, text: "올바른 철자는 Beautiful 입니다." },
+                { id: "v5", question: "What do you call a place where you borrow books?", options: ["Hospital", "Museum", "Library", "Bank"], answer: 2, text: "책을 빌리는 곳은 도서관(Library)입니다." },
+                { id: "v6", question: "What does 'protect' mean?", options: ["공격하다", "보호하다", "버리다", "만들다"], answer: 1, text: "'Protect'는 지키다, 보호하다라는 뜻입니다." },
+                { id: "v7", question: "Which one is NOT a fruit?", options: ["Apple", "Carrot", "Banana", "Grape"], answer: 1, text: "당근(Carrot)은 채소입니다." },
+                { id: "v8", question: "A doctor works in a ___.", options: ["School", "Restaurant", "Hospital", "Post office"], answer: 2, text: "의사는 병원(Hospital)에서 일합니다." },
+                { id: "v9", question: "What does 'suddenly' mean?", options: ["천천히", "갑자기", "조용히", "크게"], answer: 1, text: "'Suddenly'는 예기치 않게 빠르게 일어나는 것을 뜻합니다." },
+                { id: "v10", question: "What is the synonym(유의어) of 'happy'?", options: ["Sad", "Angry", "Glad", "Tired"], answer: 2, text: "'Glad'는 기쁜, 행복한 이라는 뜻으로 happy와 비슷합니다." }
             ],
-            grammar: [
-                { id: "g1", question: "She ___ to school every day.", options: ["go", "goes", "going", "gone"], answer: 1, explanation: "3인칭 단수 주어(She) 현재 시제이므로 동사에 -es를 붙입니다." },
-                { id: "g2", question: "I ___ a good movie yesterday.", options: ["see", "sees", "saw", "seeing"], answer: 2, explanation: "'yesterday(어제)'가 있으므로 과거형 동사 'saw'를 써야 합니다." },
-                { id: "g3", question: "Elephants are ___ than dogs.", options: ["big", "biger", "biggest", "bigger"], answer: 3, explanation: "비교급 문장입니다. big의 비교급은 단모음+단자음이므로 g를 한 번 더 쓰고 -er을 붙인 'bigger'입니다." },
-                { id: "g4", question: "This is the ___ book I have ever read.", options: ["good", "better", "best", "well"], answer: 2, explanation: "'the' 뒤에는 최상급이 옵니다. good의 최상급은 'best'입니다." },
-                { id: "g5", question: "I want ___ a doctor in the future.", options: ["be", "to be", "being", "am"], answer: 1, explanation: "want는 to부정사를 목적어로 취하는 동사입니다." },
-                { id: "g6", question: "Thank you for ___ me.", options: ["help", "helps", "helped", "helping"], answer: 3, explanation: "전치사(for) 뒤에는 동명사(-ing) 형태가 와야 합니다." },
-                { id: "g7", question: "The boy ___ is playing soccer is my brother.", options: ["who", "which", "where", "what"], answer: 0, explanation: "선행사가 사람(The boy)이므로 주격 관계대명사 'who'를 씁니다." },
-                { id: "g8", question: "My birthday is ___ May 5th.", options: ["in", "on", "at", "to"], answer: 1, explanation: "특정한 날짜 앞에는 전치사 'on'을 사용합니다." },
-                { id: "g9", question: "I was tired, ___ I went to bed early.", options: ["but", "so", "because", "or"], answer: 1, explanation: "앞 문장이 원인, 뒷 문장이 결과이므로 '그래서(so)'가 알맞습니다." },
-                { id: "g10", question: "The window was ___ by the strong wind.", options: ["break", "broke", "breaking", "broken"], answer: 3, explanation: "수동태(be+p.p) 문장이므로 break의 과거분사인 'broken'이 와야 합니다." }
+            "grammar": [
+                { id: "g1", question: "She ___ to school every day.", options: ["go", "goes", "going", "gone"], answer: 1, text: "3인칭 단수 주어(She) 현재 시제에는 동사에 -es를 붙입니다." },
+                { id: "g2", question: "I ___ a book right now.", options: ["read", "reads", "am reading", "reading"], answer: 2, text: "'right now'가 있으므로 현재진행형(be + -ing)을 씁니다." },
+                { id: "g3", question: "They ___ pizza yesterday.", options: ["eat", "eats", "eating", "ate"], answer: 3, text: "'yesterday'가 있으므로 과거형(ate)을 써야 합니다." },
+                { id: "g4", question: "___ you like apples?", options: ["Do", "Does", "Are", "Is"], answer: 0, text: "일반동사의 의문문이고 주어가 you이므로 Do를 씁니다." },
+                { id: "g5", question: "This is ___ umbrella.", options: ["a", "an", "the", "some"], answer: 1, text: "모음(u)으로 시작하는 단어 앞에는 'an'을 씁니다." },
+                { id: "g6", question: "He is taller ___ his brother.", options: ["then", "than", "that", "to"], answer: 1, text: "비교급 뒤에는 '~보다'라는 뜻의 'than'이 옵니다." },
+                { id: "g7", question: "There ___ many apples in the basket.", options: ["is", "are", "am", "be"], answer: 1, text: "복수 명사(apples)가 왔으므로 'are'를 씁니다." },
+                { id: "g8", question: "I don't have ___ money.", options: ["some", "any", "many", "few"], answer: 1, text: "부정문에서는 'any'를 주로 사용합니다." },
+                { id: "g9", question: "She can ___ very well.", options: ["sing", "sings", "singing", "sang"], answer: 0, text: "조동사(can) 뒤에는 동사원형이 옵니다." },
+                { id: "g10", question: "Look at ___ bird in the sky!", options: ["this", "that", "these", "those"], answer: 1, text: "멀리 있는 단수 명사를 가리킬 때는 'that'을 씁니다." }
             ],
-            listening: [
-                { id: "l1", tts_text: "I am happy because today is my birthday.", question: "Why is the person happy?", options: ["It is the weekend", "It is their birthday", "They got a present", "School is closed"], answer: 1, explanation: "음성에서 'today is my birthday(오늘이 생일)'라고 말했습니다." },
-                { id: "l2", tts_text: "Can I have some water, please? I am very thirsty.", question: "What does the person want?", options: ["Food", "Juice", "Milk", "Water"], answer: 3, explanation: "'Can I have some water'라며 물을 달라고 요청했습니다." },
-                { id: "l3", tts_text: "The weather is snowy and cold today.", question: "How is the weather?", options: ["Sunny and hot", "Rainy and wet", "Snowy and cold", "Cloudy and warm"], answer: 2, explanation: "'snowy and cold(눈이 오고 추운)'라고 날씨를 설명했습니다." },
-                { id: "l4", tts_text: "My favorite subject is math because I like numbers.", question: "What is the person's favorite subject?", options: ["English", "Science", "Math", "History"], answer: 2, explanation: "'My favorite subject is math'라고 명확히 말했습니다." },
-                { id: "l5", tts_text: "I usually get up at 7 o'clock in the morning.", question: "When does the person get up?", options: ["6 o'clock", "7 o'clock", "8 o'clock", "9 o'clock"], answer: 1, explanation: "'get up at 7 o'clock(7시에 일어난다)'라고 말했습니다." },
-                { id: "l6", tts_text: "Look at that tall building! It touches the sky.", question: "What is the person looking at?", options: ["A tall tree", "A high mountain", "A long bridge", "A tall building"], answer: 3, explanation: "'Look at that tall building(저 높은 건물을 봐)'이라고 말했습니다." },
-                { id: "l7", tts_text: "I went to the zoo and saw lions and tigers yesterday.", question: "Where did the person go yesterday?", options: ["Park", "Museum", "Zoo", "Library"], answer: 2, explanation: "'went to the zoo(동물원에 갔다)'라고 말했습니다." },
-                { id: "l8", tts_text: "Don't forget to bring your umbrella. It will rain soon.", question: "What should you bring?", options: ["A bag", "A coat", "An umbrella", "A hat"], answer: 2, explanation: "'bring your umbrella(우산을 챙겨라)'라고 조언했습니다." },
-                { id: "l9", tts_text: "My mom is cooking dinner in the kitchen.", question: "Where is the mom?", options: ["Living room", "Bedroom", "Bathroom", "Kitchen"], answer: 3, explanation: "'in the kitchen(부엌에서)'이라고 장소를 말했습니다." },
-                { id: "l10", tts_text: "I have a stomachache. I ate too much ice cream.", question: "Why does the person have a stomachache?", options: ["Drank cold water", "Ate too much ice cream", "Didn't sleep well", "Exercised too hard"], answer: 1, explanation: "'ate too much ice cream(아이스크림을 너무 많이 먹었다)' 때문이라고 했습니다." }
+            "listening": [
+                // tts_text is what the browser will speak
+                { id: "l1", tts_text: "I am very hungry. I want to eat a hamburger.", question: "What does the speaker want to eat?", options: ["Pizza", "Salad", "Hamburger", "Chicken"], answer: 2, text: "들려준 문장: I want to eat a hamburger." },
+                { id: "l2", tts_text: "My favorite color is blue. It looks like the ocean.", question: "What is the speaker's favorite color?", options: ["Red", "Green", "Blue", "Yellow"], answer: 2, text: "들려준 문장: My favorite color is blue." },
+                { id: "l3", tts_text: "It is raining outside. Don't forget your umbrella.", question: "What is the weather like?", options: ["Sunny", "Raining", "Snowing", "Windy"], answer: 1, text: "들려준 문장: It is raining outside." },
+                { id: "l4", tts_text: "I wake up at seven o'clock in the morning.", question: "What time does the speaker wake up?", options: ["6:00", "7:00", "8:00", "9:00"], answer: 1, text: "들려준 문장: I wake up at seven o'clock." },
+                { id: "l5", tts_text: "My brother plays soccer on weekends.", question: "What sport does the brother play?", options: ["Baseball", "Basketball", "Tennis", "Soccer"], answer: 3, text: "들려준 문장: My brother plays soccer." },
+                { id: "l6", tts_text: "She goes to work by bus.", question: "How does she go to work?", options: ["By car", "By train", "By bus", "By bike"], answer: 2, text: "들려준 문장: She goes to work by bus." },
+                { id: "l7", tts_text: "There are three cats in the garden.", question: "How many cats are there?", options: ["One", "Two", "Three", "Four"], answer: 2, text: "들려준 문장: There are three cats." },
+                { id: "l8", tts_text: "I have a headache. I need some rest.", question: "How does the speaker feel?", options: ["Happy", "Sick (Headache)", "Angry", "Excited"], answer: 1, text: "들려준 문장: I have a headache." },
+                { id: "l9", tts_text: "The science class starts at 10 AM.", question: "Which class starts at 10 AM?", options: ["Math", "English", "Science", "History"], answer: 2, text: "들려준 문장: The science class starts." },
+                { id: "l10", tts_text: "I bought a new pair of shoes yesterday.", question: "What did the speaker buy?", options: ["A bag", "Shoes", "A shirt", "A hat"], answer: 1, text: "들려준 문장: I bought a new pair of shoes." }
             ],
-            reading: [
-                { id: "r1", passage: "Tom has a dog named Max. Max is brown and white. Every morning, Tom takes Max for a walk in the park.", question: "What color is Max?", options: ["Black and white", "Brown and white", "Brown and black", "All white"], answer: 1, explanation: "지문 두 번째 문장에서 'Max is brown and white'라고 언급됩니다." },
-                { id: "r2", passage: "Jane loves reading books. Her room is full of books about history and science. She wants to be a writer.", question: "What does Jane want to be?", options: ["A teacher", "A scientist", "A doctor", "A writer"], answer: 3, explanation: "마지막 문장에서 'She wants to be a writer(작가가 되고 싶어한다)'라고 나옵니다." },
-                { id: "r3", passage: "Apples are good for your health. They have many vitamins. Eating an apple a day keeps the doctor away.", question: "Why are apples good for you?", options: ["They are red", "They have many vitamins", "They are sweet", "They are cheap"], answer: 1, explanation: "두 번째 문장에서 'They have many vitamins(비타민이 많다)'라고 설명합니다." },
-                { id: "r4", passage: "The Eiffel Tower is in Paris, France. It is made of iron and is very tall. Many tourists visit it every year.", question: "Where is the Eiffel Tower?", options: ["London", "New York", "Paris", "Rome"], answer: 2, explanation: "첫 문장에서 'is in Paris, France'라고 명시되어 있습니다." },
-                { id: "r5", passage: "Penguins are birds, but they cannot fly. They live in cold places and are very good swimmers.", question: "What can penguins do very well?", options: ["Fly", "Run", "Sing", "Swim"], answer: 3, explanation: "마지막 부분에 'are very good swimmers(수영을 아주 잘한다)'라고 나옵니다." },
-                { id: "r6", passage: "Mike lost his key yesterday. He looked for it everywhere, but he couldn't find it. He had to wait for his mom.", question: "What did Mike lose?", options: ["His bag", "His key", "His phone", "His money"], answer: 1, explanation: "첫 문장에서 'Mike lost his key'라고 나옵니다." },
-                { id: "r7", passage: "The sun rises in the east and sets in the west. It gives us light and warm energy during the day.", question: "Where does the sun rise?", options: ["North", "South", "East", "West"], answer: 2, explanation: "첫 문장에서 'rises in the east(동쪽에서 뜬다)'라고 설명합니다." },
-                { id: "r8", passage: "Sarah bought a new dress for the party. It was blue with white flowers. She looked beautiful in it.", question: "What did Sarah's dress look like?", options: ["Red with dots", "Blue with white flowers", "Yellow and long", "Black and short"], answer: 1, explanation: "두 번째 문장에 'blue with white flowers'라고 묘사되어 있습니다." },
-                { id: "r9", passage: "Water is essential for all living things. Humans, animals, and plants need water to survive.", question: "Who needs water to survive?", options: ["Only humans", "Only plants", "Only animals", "All living things"], answer: 3, explanation: "첫 문장에서 'essential for all living things'라고 명시합니다." },
-                { id: "r10", passage: "Baseball is a popular sport in Korea. There are nine players on each team. They use a bat and a ball.", question: "How many players are on a baseball team?", options: ["Five", "Seven", "Nine", "Eleven"], answer: 2, explanation: "두 번째 문장에서 'nine players on each team'이라고 나옵니다." }
+            "reading": [
+                { id: "r1", passage: "Tom has a dog named Max. Max is brown and white. Every morning, Tom takes Max for a walk in the park.", question: "What color is Max?", options: ["Black and white", "Brown and white", "Brown and black", "All white"], answer: 1, text: "지문에서 'Max is brown and white'라고 직접 언급됩니다." },
+                { id: "r2", passage: "Anna loves reading books. She goes to the library every Saturday. Her favorite books are about space.", question: "When does Anna go to the library?", options: ["Every Sunday", "Every Friday", "Every Saturday", "Every Monday"], answer: 2, text: "지문: She goes to the library every Saturday." },
+                { id: "r3", passage: "The cheetah is the fastest land animal. It can run up to 120 km per hour. However, it can only run this fast for a short time.", question: "What is true about the cheetah?", options: ["It is the slowest animal", "It can run fast for a long time", "It is the fastest land animal", "It lives in the water"], answer: 2, text: "지문: The cheetah is the fastest land animal." },
+                { id: "r4", passage: "People wear warm clothes in winter because it is very cold. They wear coats, gloves, and scarves to stay warm.", question: "Why do people wear warm clothes in winter?", options: ["Because it is hot", "Because it is rainy", "Because it is cold", "Because it is windy"], answer: 2, text: "지문: because it is very cold." },
+                { id: "r5", passage: "Jane bought apples, bananas, and milk at the supermarket. She paid 15 dollars in total.", question: "What did Jane NOT buy?", options: ["Apples", "Bananas", "Milk", "Bread"], answer: 3, text: "지문에서 Bread(빵)는 언급되지 않았습니다." },
+                { id: "r6", passage: "Trees are important for us. They give us oxygen to breathe and make the air clean. Many animals live in trees.", question: "What do trees give us to breathe?", options: ["Water", "Oxygen", "Food", "Money"], answer: 1, text: "지문: They give us oxygen to breathe." },
+                { id: "r7", passage: "My school has a big playground. Students play soccer and basketball there during lunchtime.", question: "What do students do in the playground?", options: ["Study math", "Play sports", "Eat dinner", "Sleep"], answer: 1, text: "soccer와 basketball은 sports에 해당합니다." },
+                { id: "r8", passage: "Water is essential for life. Humans, animals, and plants all need water to survive. We should not waste water.", question: "Who needs water according to the passage?", options: ["Only humans", "Only animals", "Only plants", "Humans, animals, and plants"], answer: 3, text: "지문: Humans, animals, and plants all need water." },
+                { id: "r9", passage: "Last summer, David traveled to Paris with his family. They visited the Eiffel Tower and ate delicious French food.", question: "Where did David travel last summer?", options: ["London", "New York", "Paris", "Rome"], answer: 2, text: "지문: David traveled to Paris." },
+                { id: "r10", passage: "Elephants are very large animals with long trunks. They use their trunks to drink water and pick up food.", question: "What do elephants use their trunks for?", options: ["To run fast", "To fly", "To drink and pick up food", "To see better"], answer: 2, text: "지문: They use their trunks to drink water and pick up food." }
             ]
         };
+
+        // Avatar Colors
+        const colors = [
+            { bg: '#ef4444', text: '#fff' }, { bg: '#f97316', text: '#fff' },
+            { bg: '#eab308', text: '#000' }, { bg: '#22c55e', text: '#fff' },
+            { bg: '#0ea5e9', text: '#fff' }, { bg: '#8b5cf6', text: '#fff' },
+            { bg: '#ec4899', text: '#fff' }, { bg: '#64748b', text: '#fff' }
+        ];
 
         const app = {
             role: null, // 'teacher' or 'student'
             roomCode: null,
             playerId: null,
-            channel: null, // BroadcastChannel for local multiplayer
+            processedActions: {}, // Track processed Firebase actions
             bots: [], // For demo mode
             
             // State
             gameState: {
-                phase: 'waiting', // waiting, countdown, playing, reveal, finished
-                settings: { rounds: 5, time: 20, hp: 3, rescue: true, types: [] },
-                players: {},
-                currentRound: 0,
-                questionBase: [], // Array of questions for this game
-                currentQ: null,
-                timer: 0,
-                ttsPlays: 0
+                phase: 'setup', // setup, waiting, countdown, playing, reveal, results
+                round: 1,
+                settings: {},
+                questionBase: [],
+                currentQuestion: null,
+                timeLeft: 0,
+                players: {} // { id: { name, color, hp, score, combo, isAlive, ans } }
             },
             
-            // Interval references
-            timerInt: null,
-            botInt: null,
+            timerInterval: null,
+            ttsSynth: window.speechSynthesis,
+            ttsRemaining: 2,
 
-            // Utils
+            toast: (msg) => {
+                const c = document.getElementById('toast-container');
+                const t = document.createElement('div');
+                t.className = 'toast show';
+                t.textContent = msg;
+                c.appendChild(t);
+                setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
+            },
+
             showScreen: (id) => {
-                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
                 document.getElementById(id).classList.add('active');
             },
-            toast: (msg) => {
-                const t = document.createElement('div');
-                t.className = 'toast';
-                t.textContent = msg;
-                document.getElementById('toast-container').appendChild(t);
-                setTimeout(() => t.remove(), 2500);
-            },
+
             generateCode: () => {
                 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                 let code = '';
@@ -553,34 +593,68 @@
                 return code;
             },
             
-            initNetwork: (code, isHost) => {
+            initNetwork: async (code, isHost) => {
                 app.roomCode = code;
-                app.channel = new BroadcastChannel('ebr_room_' + code);
                 
-                app.channel.onmessage = (e) => {
-                    const msg = e.data;
-                    if (isHost) {
-                        // Host receives actions from students
-                        if (msg.type === 'JOIN') app.hostHandleJoin(msg.data);
-                        if (msg.type === 'ANSWER') app.hostHandleAnswer(msg.data);
-                        if (msg.type === 'EMOJI') app.hostHandleEmoji(msg.data);
-                    } else {
-                        // Student receives state sync from host
-                        if (msg.type === 'SYNC') app.studentHandleSync(msg.data);
-                        if (msg.type === 'KICK') { app.toast("방이 종료되었습니다."); location.reload(); }
+                if (!window.fAuth || !window.fAuth.currentUser) {
+                    app.toast("서버 연결 중...");
+                    let checks = 0;
+                    while(!window.fAuth?.currentUser && checks < 20) {
+                        await new Promise(r => setTimeout(r, 200));
+                        checks++;
                     }
-                };
+                    if (!window.fAuth?.currentUser) return app.toast("서버 연결에 실패했습니다.");
+                }
+
+                const stateRef = window.fDoc(window.fDb, 'artifacts', window.fAppId, 'public', 'data', 'rooms', code);
+                const actionsRef = window.fDoc(window.fDb, 'artifacts', window.fAppId, 'public', 'data', 'room_actions', code);
+
+                if (isHost) {
+                    // Host listens to actions from students
+                    window.fOnSnapshot(actionsRef, (snap) => {
+                        if (!snap.exists()) return;
+                        const actions = snap.data();
+                        for (const [pid, action] of Object.entries(actions)) {
+                            // Deduplicate already processed actions
+                            if (app.processedActions[pid] === action.time) continue;
+                            app.processedActions[pid] = action.time;
+
+                            if (action.type === 'JOIN') app.hostHandleJoin({ id: pid, ...action });
+                            if (action.type === 'ANSWER') app.hostHandleAnswer({ pid, qId: action.qId, ansIdx: action.ansIdx });
+                            if (action.type === 'EMOJI') app.hostHandleEmoji({ emoji: action.emoji });
+                        }
+                    }, (err) => console.error("Host snap error", err));
+                } else {
+                    // Student listens to authoritative game state from host
+                    window.fOnSnapshot(stateRef, (snap) => {
+                        if (snap.exists()) {
+                            app.studentHandleSync(snap.data());
+                        } else {
+                            if (app.gameState.phase !== 'waiting') {
+                                app.toast("방이 종료되었습니다.");
+                                setTimeout(() => location.reload(), 2000);
+                            }
+                        }
+                    }, (err) => console.error("Student snap error", err));
+                }
             },
-            broadcast: (type, data) => {
-                if (app.channel) app.channel.postMessage({ type, data });
+            broadcast: async (type, data) => {
+                if (!app.roomCode || !window.fAuth?.currentUser) return;
+                const actionsRef = window.fDoc(window.fDb, 'artifacts', window.fAppId, 'public', 'data', 'room_actions', app.roomCode);
+                try {
+                    // Use merge: true so students don't overwrite each other's actions
+                    await window.fSetDoc(actionsRef, {
+                        [app.playerId]: { type, ...data, time: Date.now() }
+                    }, { merge: true });
+                } catch(e) { console.error("Broadcast error", e); }
             },
 
             // ==========================================
             // ==========================================
             initTeacherSetup: () => {
                 app.role = 'teacher';
-                app.showScreen('view-teacher-setup');
             },
+
             createRoom: () => {
                 const types = Array.from(document.querySelectorAll('.t-setup-type:checked')).map(cb => cb.value);
                 if (types.length === 0) return app.toast("최소 1개의 문제 유형을 선택하세요!");
@@ -609,505 +683,612 @@
                 app.showScreen('view-teacher-lobby');
                 app.hostSyncState();
             },
-            hostSyncState: () => {
-                // Send state to all clients
-                app.broadcast('SYNC', app.gameState);
+            hostSyncState: async () => {
+                // Update local UI
                 app.updateTeacherUI();
+                
+                // Sync authoritative state to Firebase for all students
+                if (app.roomCode && window.fAuth?.currentUser) {
+                    const stateRef = window.fDoc(window.fDb, 'artifacts', window.fAppId, 'public', 'data', 'rooms', app.roomCode);
+                    try {
+                        await window.fSetDoc(stateRef, app.gameState);
+                    } catch(e) { console.error("Sync error", e); }
+                }
             },
             hostHandleJoin: (player) => {
-                if (app.gameState.phase !== 'waiting') return; // Cannot join mid-game in this version
+                if (app.gameState.phase !== 'setup' && app.gameState.phase !== 'waiting') return;
                 app.gameState.players[player.id] = {
-                    ...player, hp: app.gameState.settings.hp, score: 0, combo: 0, isAlive: true, answers: {}
+                    name: player.name,
+                    color: player.color,
+                    hp: app.gameState.settings.hp,
+                    score: 0,
+                    combo: 0,
+                    isAlive: true,
+                    ans: null,
+                    rescued: false
                 };
+                app.gameState.phase = 'waiting';
                 app.hostSyncState();
             },
             hostHandleAnswer: (data) => {
-                const { pid, qId, ansIdx } = data;
-                const p = app.gameState.players[pid];
-                if (!p || !p.isAlive || app.gameState.phase !== 'playing') return;
-                
-                p.answers[qId] = ansIdx;
-                app.hostSyncState(); // Update UI to show they answered (without revealing if correct yet)
+                if (app.gameState.phase !== 'playing') return;
+                const p = app.gameState.players[data.pid];
+                if (p && p.isAlive && app.gameState.currentQuestion.id === data.qId && p.ans === null) {
+                    p.ans = data.ansIdx;
+                    app.hostSyncState();
+                }
             },
             hostHandleEmoji: (data) => {
-                // Show flying emoji on teacher screen
-                const emoji = document.createElement('div');
-                emoji.textContent = data.emoji;
-                emoji.className = 'absolute text-4xl animate-float z-50 pointer-events-none';
-                emoji.style.left = Math.random() * 80 + 10 + '%';
-                emoji.style.bottom = '10%';
-                document.getElementById('view-teacher-game').appendChild(emoji);
-                setTimeout(() => emoji.remove(), 1000);
-            },
-            addDemoBots: () => {
-                const botNames = ['지민', '민호', '수아', '현우', '다은'];
-                const colors = ['#FF6B6B', '#4ECDC4', '#F9CA24', '#6C5CE7', '#FF8ED4'];
-                
-                botNames.forEach((name, i) => {
-                    const id = 'bot_' + i;
-                    app.gameState.players[id] = {
-                        id, name, avatarColor: colors[i],
-                        hp: app.gameState.settings.hp, score: 0, combo: 0, isAlive: true, answers: {}, isBot: true
-                    };
-                });
-                app.hostSyncState();
-            },
-            startGame: () => {
-                if (Object.keys(app.gameState.players).length === 0) return app.toast("학생이 최소 1명 필요합니다.");
-                app.gameState.phase = 'countdown';
-                app.gameState.currentRound = 0;
-                app.showScreen('view-teacher-game');
-                app.hostSyncState();
-                app.startBigCountdown(() => app.nextRound());
+                app.showEmojiOnScreen(data.emoji);
             },
             
-            startBigCountdown: (callback) => {
-                const el = document.getElementById('t-game-big-countdown');
-                const num = document.getElementById('t-game-big-countdown-num');
-                el.classList.remove('hidden');
-                let count = 3;
-                num.textContent = count;
+            addBot: () => {
+                const botNames = ['철수', '영희', '민수', '지민', '진우'];
+                const id = 'bot_' + Math.random().toString(36).substr(2, 5);
+                const name = botNames[app.bots.length % botNames.length] + '(Bot)';
+                const color = colors[Math.floor(Math.random() * colors.length)];
                 
-                const int = setInterval(() => {
-                    count--;
-                    if (count > 0) {
-                        num.textContent = count;
-                        num.classList.remove('animate-popup'); void num.offsetWidth; num.classList.add('animate-popup');
+                app.bots.push(id);
+                app.hostHandleJoin({ id, name, color });
+            },
+            simulateBots: () => {
+                if (app.gameState.phase !== 'playing') return;
+                const qId = app.gameState.currentQuestion.id;
+                const correctIdx = app.gameState.currentQuestion.answer;
+                
+                app.bots.forEach(id => {
+                    const p = app.gameState.players[id];
+                    if (p && p.isAlive && p.ans === null) {
+                        // 70% chance correct, random delay
+                        setTimeout(() => {
+                            if (app.gameState.phase === 'playing') {
+                                const isCorrect = Math.random() < 0.7;
+                                let ansIdx = correctIdx;
+                                if (!isCorrect) {
+                                    ansIdx = Math.floor(Math.random() * 4);
+                                    if (ansIdx === correctIdx) ansIdx = (ansIdx + 1) % 4;
+                                }
+                                app.hostHandleAnswer({ pid: id, qId, ansIdx });
+                            }
+                        }, 1000 + Math.random() * (app.gameState.settings.time * 1000 - 2000));
+                    }
+                });
+            },
+
+            hostStartGame: () => {
+                app.gameState.phase = 'countdown';
+                app.hostSyncState();
+                app.showScreen('view-teacher-game');
+                
+                let count = 3;
+                const overlay = document.getElementById('t-game-overlay');
+                const text = document.getElementById('t-game-overlay-text');
+                overlay.classList.remove('hidden');
+                
+                const iv = setInterval(() => {
+                    if(count > 0) {
+                        text.textContent = count;
+                        text.classList.remove('anim-pop');
+                        void text.offsetWidth; // trigger reflow
+                        text.classList.add('anim-pop');
+                        count--;
                     } else {
-                        clearInterval(int);
-                        el.classList.add('hidden');
-                        callback();
+                        clearInterval(iv);
+                        overlay.classList.add('hidden');
+                        app.hostNextQuestion();
                     }
                 }, 1000);
             },
-            nextRound: () => {
-                app.gameState.currentRound++;
-                if (app.gameState.currentRound > app.gameState.settings.rounds) {
-                    app.endGame();
+            
+            hostNextQuestion: () => {
+                if (app.gameState.round > app.gameState.settings.rounds) {
+                    app.hostEndGame();
                     return;
                 }
-                
-                const q = app.gameState.questionBase[app.gameState.currentRound - 1];
-                app.gameState.currentQ = q;
+
+                // Check alive count
+                const aliveCount = Object.values(app.gameState.players).filter(p => p.isAlive).length;
+                if (aliveCount === 0 && Object.keys(app.gameState.players).length > 0) {
+                    app.hostEndGame();
+                    return;
+                }
+
+                // Reset answers
+                for(let id in app.gameState.players) {
+                    app.gameState.players[id].ans = null;
+                }
+
+                const qData = app.gameState.questionBase[app.gameState.round - 1];
+                app.gameState.currentQuestion = {
+                    id: qData.id,
+                    type: qData.type,
+                    text: qData.passage ? qData.passage + "\n\nQ: " + qData.question : qData.question,
+                    options: qData.options,
+                    tts: qData.tts_text,
+                    answer: qData.answer, // Host keeps answer
+                    explanation: qData.text
+                };
+
+                app.gameState.timeLeft = app.gameState.settings.time;
                 app.gameState.phase = 'playing';
-                app.gameState.timer = app.gameState.settings.time;
-                app.gameState.ttsPlays = 0;
+                app.ttsRemaining = 2;
                 
-                document.getElementById('t-btn-reveal').classList.add('hidden');
-                document.getElementById('t-btn-next').classList.add('hidden');
-                document.getElementById('t-game-explanation').classList.add('hidden');
+                // Hide actual answer from students by omitting it in broadcast copy?
+                // For simplicity and to avoid complex shallow copies, we send it, but student UI hides it until reveal.
                 
                 app.hostSyncState();
-                
-                // Start timer
-                app.timerInt = setInterval(() => {
-                    app.gameState.timer--;
-                    app.hostSyncState();
-                    if (app.gameState.timer <= 0) {
-                        clearInterval(app.timerInt);
-                        app.revealAnswer();
-                    }
-                }, 1000);
+                app.startTimer();
+                app.simulateBots();
+            },
 
-                // Bot logic for demo mode
-                app.botInt = setInterval(() => {
-                    if (app.gameState.phase !== 'playing') return;
-                    Object.values(app.gameState.players).forEach(p => {
-                        if (p.isBot && p.isAlive && p.answers[q.id] === undefined) {
-                            if (Math.random() < 0.1) { // 10% chance per interval to answer
-                                // 70% chance correct
-                                const isCorrect = Math.random() < 0.7;
-                                let ans = isCorrect ? q.answer : Math.floor(Math.random() * 4);
-                                app.hostHandleAnswer({ pid: p.id, qId: q.id, ansIdx: ans });
-                            }
-                        }
-                    });
-                }, 1000);
+            startTimer: () => {
+                if(app.timerInterval) clearInterval(app.timerInterval);
+                const startTime = Date.now();
+                const totalTime = app.gameState.settings.time;
+                
+                app.timerInterval = setInterval(() => {
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    let remaining = Math.max(0, totalTime - elapsed);
+                    app.gameState.timeLeft = remaining;
+                    
+                    // Local UI fast update
+                    const bar = document.getElementById('t-game-timer-bar');
+                    const pct = (remaining / totalTime) * 100;
+                    bar.style.width = `${pct}%`;
+                    if(pct < 30) bar.className = 'timer-bar danger';
+                    else if(pct < 60) bar.className = 'timer-bar warning';
+                    else bar.className = 'timer-bar';
+                    
+                    document.getElementById('t-game-time-text').textContent = Math.ceil(remaining) + 's';
+
+                    if (remaining <= 0) {
+                        clearInterval(app.timerInterval);
+                        app.hostRevealAnswer();
+                    }
+                }, 100); // 10fps for smooth bar
             },
-            playTTS: () => {
-                if (app.gameState.ttsPlays >= 2) return app.toast("듣기는 2번까지만 가능합니다.");
-                const text = app.gameState.currentQ.tts_text;
-                if (!text) return;
-                const u = new SpeechSynthesisUtterance(text);
-                u.lang = 'en-US';
-                u.rate = 0.9;
-                window.speechSynthesis.speak(u);
-                app.gameState.ttsPlays++;
-                document.getElementById('t-game-tts-count').textContent = 2 - app.gameState.ttsPlays;
-            },
-            revealAnswer: () => {
-                clearInterval(app.timerInt);
-                clearInterval(app.botInt);
+
+            hostRevealAnswer: () => {
+                if(app.timerInterval) clearInterval(app.timerInterval);
                 app.gameState.phase = 'reveal';
                 
-                const q = app.gameState.currentQ;
+                const correctIdx = app.gameState.currentQuestion.answer;
                 
-                // Process results
-                Object.values(app.gameState.players).forEach(p => {
-                    if (!p.isAlive) return;
-                    const ans = p.answers[q.id];
-                    if (ans === q.answer) {
+                // Calculate logic
+                for(let id in app.gameState.players) {
+                    const p = app.gameState.players[id];
+                    if (!p.isAlive) continue;
+                    
+                    if (p.ans === correctIdx) {
                         // Correct
                         p.combo++;
                         let mult = 1;
-                        if (p.combo >= 5) mult = 3;
-                        else if (p.combo >= 3) mult = 2;
-                        else if (p.combo >= 2) mult = 1.5;
+                        if(p.combo >= 5) mult = 3;
+                        else if(p.combo >= 3) mult = 2;
+                        else if(p.combo >= 2) mult = 1.5;
                         p.score += Math.floor(100 * mult);
                     } else {
-                        // Wrong / Timeout
+                        // Wrong or Timeout
                         p.combo = 0;
                         p.hp--;
                         if (p.hp <= 0) p.isAlive = false;
                     }
-                });
+                }
                 
                 app.hostSyncState();
+                
+                // Auto next round after 5s
+                setTimeout(() => {
+                    app.gameState.round++;
+                    app.hostNextQuestion();
+                }, 5000);
             },
-            endGame: () => {
-                app.gameState.phase = 'finished';
+
+            hostEndGame: () => {
+                app.gameState.phase = 'results';
                 app.hostSyncState();
                 app.showScreen('view-teacher-results');
-                
-                // Confetti
-                const c = document.getElementById('confetti-container');
-                for(let i=0; i<100; i++){
-                    let div = document.createElement('div');
-                    div.className = 'confetti';
-                    div.style.left = Math.random() * 100 + 'vw';
-                    div.style.backgroundColor = ['#f00','#0f0','#00f','#ff0','#f0f','#0ff'][Math.floor(Math.random()*6)];
-                    div.style.animationDelay = Math.random() * 2 + 's';
-                    c.appendChild(div);
-                }
+                app.createFireworks();
             },
+
+            playTTS: () => {
+                if (app.ttsRemaining <= 0) return;
+                if (!app.gameState.currentQuestion || !app.gameState.currentQuestion.tts) return;
+                
+                const ut = new SpeechSynthesisUtterance(app.gameState.currentQuestion.tts);
+                ut.lang = 'en-US';
+                ut.rate = 0.9;
+                app.ttsSynth.speak(ut);
+                
+                app.ttsRemaining--;
+                document.getElementById('t-tts-count').textContent = app.ttsRemaining;
+                if(app.ttsRemaining === 0) document.getElementById('t-btn-tts').disabled = true;
+            },
+
             updateTeacherUI: () => {
                 const s = app.gameState;
                 
-                // Lobby
-                if (s.phase === 'waiting') {
-                    const parr = Object.values(s.players);
-                    document.getElementById('t-lobby-count').textContent = parr.length;
-                    document.getElementById('btn-start-game').disabled = parr.length === 0;
-                    
-                    const pContainer = document.getElementById('t-lobby-players');
-                    pContainer.innerHTML = '';
-                    parr.forEach(p => {
-                        pContainer.innerHTML += `
-                            <div class="flex flex-col items-center bg-[#16213e] p-3 rounded-xl border border-gray-700 animate-popup">
-                                <div class="w-12 h-12 rounded-full mb-2 border-2 border-white" style="background-color: ${p.avatarColor}"></div>
-                                <span class="font-bold truncate w-full text-center">${p.name}</span>
-                            </div>
-                        `;
-                    });
+                if (s.phase === 'setup' || s.phase === 'waiting') {
+                    const pList = Object.values(s.players);
+                    document.getElementById('t-lobby-count').textContent = pList.length;
+                    const c = document.getElementById('t-lobby-players');
+                    c.innerHTML = pList.map(p => `
+                        <div class="player-card">
+                            <div class="avatar mx-auto mb-2" style="background:${p.color.bg}; color:${p.color.text}">${p.name.substring(0,2)}</div>
+                            <div class="font-bold truncate">${p.name}</div>
+                        </div>
+                    `).join('');
+                    document.getElementById('t-btn-start').disabled = pList.length < 1; // Allow 1 for demo
                 }
-                
-                // Game
-                if (['playing', 'reveal'].includes(s.phase)) {
-                    document.getElementById('t-game-round').textContent = s.currentRound;
+
+                if (s.phase === 'playing' || s.phase === 'reveal') {
+                    document.getElementById('t-game-round').textContent = s.round;
                     document.getElementById('t-game-total-rounds').textContent = s.settings.rounds;
                     
-                    const alive = Object.values(s.players).filter(p => p.isAlive).length;
-                    document.getElementById('t-game-survivors').textContent = alive;
+                    const pList = Object.values(s.players);
+                    const alive = pList.filter(p => p.isAlive).length;
+                    document.getElementById('t-game-alive').textContent = alive;
                     
-                    // Timer update
-                    const circle = document.getElementById('t-game-timer-ring');
-                    const percent = s.timer / s.settings.time;
-                    circle.style.strokeDashoffset = 283 - (283 * percent);
-                    document.getElementById('t-game-timer').textContent = s.timer;
-                    
-                    // Question setup
-                    const q = s.currentQ;
-                    document.getElementById('t-game-type-badge').textContent = q.type.toUpperCase();
-                    document.getElementById('t-game-question').textContent = q.question;
-                    
-                    if (q.type === 'reading') {
-                        const p = document.getElementById('t-game-passage');
-                        p.textContent = q.passage;
-                        p.classList.remove('hidden');
-                    } else {
-                        document.getElementById('t-game-passage').classList.add('hidden');
-                    }
-                    
-                    const ttsBtn = document.getElementById('t-game-tts-btn');
-                    if (q.type === 'listening') {
-                        ttsBtn.classList.remove('hidden');
-                        document.getElementById('t-game-tts-count').textContent = 2 - s.ttsPlays;
-                    } else {
-                        ttsBtn.classList.add('hidden');
-                    }
-                    
-                    // Options
-                    const optCont = document.getElementById('t-game-options');
-                    optCont.innerHTML = '';
-                    q.options.forEach((opt, i) => {
-                        let extraCls = 'text-gray-400';
-                        if (s.phase === 'reveal') {
-                            if (i === q.answer) extraCls = 'correct !text-white !scale-105';
-                            else extraCls = 'wrong opacity-30';
-                        }
-                        optCont.innerHTML += `<div class="btn-option p-4 rounded-xl text-xl font-bold flex items-center justify-center ${extraCls}">${['A','B','C','D'][i]}. ${opt}</div>`;
-                    });
-                    
-                    // Explanation & Next buttons
-                    if (s.phase === 'reveal') {
-                        document.getElementById('t-game-explanation').textContent = q.explanation;
-                        document.getElementById('t-game-explanation').classList.remove('hidden');
-                        document.getElementById('t-btn-next').classList.remove('hidden');
-                        document.getElementById('t-btn-reveal').classList.add('hidden');
-                    } else {
-                        document.getElementById('t-btn-reveal').classList.remove('hidden');
-                    }
-                    
-                    // HP Grid
-                    const grid = document.getElementById('t-game-hp-grid');
-                    grid.innerHTML = '';
-                    Object.values(s.players).forEach(p => {
-                        let borderCls = p.isAlive ? 'border-green-500' : 'border-gray-600 opacity-50 grayscale';
-                        if (p.isAlive && p.hp <= (s.settings.hp/2)) borderCls = 'border-yellow-500 animate-pulse';
+                    const q = s.currentQuestion;
+                    if(q) {
+                        document.getElementById('t-game-type-badge').textContent = q.type;
+                        // Replace newlines with <br> for reading passages
+                        document.getElementById('t-game-question').innerHTML = q.text.replace(/\n/g, '<br>');
                         
-                        let hpStr = '';
-                        for(let i=0; i<s.settings.hp; i++) {
-                            hpStr += i < p.hp ? '??' : '??';
-                        }
-                        
-                        let statusCls = '';
-                        if (s.phase === 'reveal' && p.isAlive) {
-                            const ans = p.answers[q.id];
-                            if (ans === q.answer) statusCls = 'text-green-400 font-bold';
-                            else if (ans === undefined) statusCls = 'text-gray-400';
-                            else statusCls = 'text-red-400';
-                        }
+                        const opts = document.getElementById('t-game-options');
+                        opts.innerHTML = q.options.map((opt, i) => {
+                            let cls = 'btn-option p-4 rounded-xl text-2xl font-bold';
+                            if (s.phase === 'reveal') {
+                                if (i === q.answer) cls += ' correct';
+                                else cls += ' wrong';
+                            }
+                            return `<div class="${cls}">${String.fromCharCode(65+i)}. ${opt}</div>`;
+                        }).join('');
 
-                        grid.innerHTML += `
-                            <div class="flex items-center gap-2 bg-[#0f3460] px-3 py-2 rounded-lg border-2 ${borderCls}">
-                                <div class="w-6 h-6 rounded-full border border-white" style="background-color: ${p.avatarColor}"></div>
-                                <div class="flex flex-col">
-                                    <span class="text-xs font-bold truncate w-16 ${statusCls}">${p.name} ${p.combo >=3 ? '??' : ''}</span>
-                                    <span class="text-[10px] tracking-tighter">${hpStr}</span>
+                        const ttsBtn = document.getElementById('t-btn-tts');
+                        if (q.type === 'listening') {
+                            ttsBtn.classList.remove('hidden');
+                            ttsBtn.classList.add('flex');
+                            document.getElementById('t-tts-count').textContent = app.ttsRemaining;
+                            ttsBtn.disabled = app.ttsRemaining <= 0;
+                        } else {
+                            ttsBtn.classList.add('hidden');
+                            ttsBtn.classList.remove('flex');
+                        }
+                    }
+
+                    // Player Grid Update
+                    const grid = document.getElementById('t-game-player-grid');
+                    grid.innerHTML = Object.values(s.players).map(p => {
+                        let cls = 'player-card';
+                        if (!p.isAlive) cls += ' dead';
+                        else if (p.hp >= s.settings.hp) cls += ' full-hp';
+                        else if (p.hp <= s.settings.hp/2) cls += ' low-hp';
+                        
+                        let status = '';
+                        if (p.isAlive && s.phase === 'playing') {
+                            status = p.ans !== null ? '✅ 제출' : '⏳ 고민중';
+                        }
+                        
+                        return `
+                            <div class="${cls}">
+                                <div class="avatar mx-auto mb-1 w-8 h-8 text-sm" style="background:${p.color.bg}; color:${p.color.text}">${p.name.substring(0,2)}</div>
+                                <div class="font-bold truncate text-xs">${p.name}</div>
+                                <div class="text-xs flex justify-center gap-1 my-1">
+                                    ${Array(s.settings.hp).fill(0).map((_,i) => `<span class="text-red-500 ${i>=p.hp?'opacity-30 grayscale':''} font-game text-[10px]">❤</span>`).join('')}
                                 </div>
+                                <div class="text-xs text-gray-400">${status}</div>
                             </div>
                         `;
-                    });
+                    }).join('');
+
+                    // Stats
+                    const submitted = pList.filter(p => p.isAlive && p.ans !== null).length;
+                    document.getElementById('t-game-stats').classList.remove('hidden');
+                    document.getElementById('t-game-submitted').textContent = submitted;
+                    document.getElementById('t-game-total-players').textContent = alive;
                 }
-                
-                // Results
-                if (s.phase === 'finished') {
-                    const sorted = Object.values(s.players).sort((a,b) => {
-                        if (a.isAlive !== b.isAlive) return a.isAlive ? -1 : 1;
-                        if (a.score !== b.score) return b.score - a.score;
-                        return b.hp - a.hp;
-                    });
-                    
-                    if(sorted[0]) document.getElementById('t-res-winner-name').textContent = sorted[0].name;
-                    if(sorted[1]) document.getElementById('t-res-p2').textContent = sorted[1].name; else document.getElementById('t-res-p2').parentNode.style.display='none';
-                    if(sorted[2]) document.getElementById('t-res-p3').textContent = sorted[2].name; else document.getElementById('t-res-p3').parentNode.style.display='none';
-                    
-                    const tbody = document.getElementById('t-res-leaderboard');
-                    tbody.innerHTML = '';
-                    sorted.forEach((p, i) => {
-                        tbody.innerHTML += `
-                            <tr class="border-b border-gray-700 ${p.isAlive ? 'text-white' : 'text-gray-500'}">
-                                <td class="p-2 font-bold">${i+1}</td>
-                                <td class="p-2 flex items-center gap-2">
-                                    <div class="w-5 h-5 rounded-full" style="background-color: ${p.avatarColor}"></div>
-                                    ${p.name} ${!p.isAlive ? '(탈락)' : ''}
-                                </td>
-                                <td class="p-2">${p.hp} HP</td>
-                                <td class="p-2 font-game text-yellow-400">${p.score}</td>
-                            </tr>
-                        `;
-                    });
+
+                if (s.phase === 'results') {
+                    app.renderResults();
                 }
             },
 
-            // ==========================================
-            // ==========================================
-            initStudentJoin: () => {
+            initStudentLogin: () => {
+                const c = document.getElementById('s-login-colors');
+                c.innerHTML = colors.map((col, i) => `
+                    <label class="cursor-pointer hover:scale-110 transition-transform">
+                        <input type="radio" name="scolor" value="${i}" class="peer hidden" ${i===0?'checked':''}>
+                        <div class="w-10 h-10 rounded-full border-4 border-transparent peer-checked:border-white shadow-lg" style="background:${col.bg}"></div>
+                    </label>
+                `).join('');
+            },
+
+            studentJoin: async () => {
+                const code = document.getElementById('s-login-code').value.toUpperCase();
+                const name = document.getElementById('s-login-name').value.trim();
+                if(code.length !== 4) return app.toast('룸 코드 4자리를 입력하세요.');
+                if(!name) return app.toast('이름을 입력하세요.');
+
+                const colorIdx = document.querySelector('input[name="scolor"]:checked').value;
+                
                 app.role = 'student';
-                app.showScreen('view-student-join');
+                
+                // Get real UID if connected, else generate temporary for local testing
+                let uid = window.fAuth?.currentUser?.uid;
+                if(!uid) {
+                    uid = 'p_' + Math.random().toString(36).substr(2, 9);
+                    app.toast("경고: 서버에 연결되지 않아 로컬 모드로 진행됩니다.");
+                }
+                
+                app.playerId = uid;
+                app.roomCode = code;
+
+                // Set up UI
+                document.getElementById('s-lobby-name').textContent = name;
+                document.getElementById('s-lobby-room').textContent = code;
+                const av = document.getElementById('s-lobby-avatar');
+                av.style.background = colors[colorIdx].bg;
+                av.style.color = colors[colorIdx].text;
+                av.textContent = name.substring(0,2);
+                
+                app.showScreen('view-student-lobby');
+                
+                // Init Network
+                await app.initNetwork(code, false);
+                
+                // Send Join Action
+                app.broadcast('JOIN', { name, color: colors[colorIdx] });
             },
-            selectColor: (el) => {
-                document.querySelectorAll('.color-btn').forEach(b => { b.style.borderColor = 'transparent'; b.classList.remove('selected-color'); });
-                el.style.borderColor = 'white';
-                el.classList.add('selected-color');
-            },
-            joinRoom: () => {
-                const code = document.getElementById('s-join-code').value.toUpperCase();
-                const name = document.getElementById('s-join-name').value.trim();
-                const colorEl = document.querySelector('.selected-color');
+
+            studentHandleSync: (hostState) => {
+                // Ignore if it's an old state or same phase and nothing relevant changed (optimization omitted for simplicity)
+                app.gameState = hostState;
+                const s = app.gameState;
+                const me = s.players[app.playerId];
                 
-                if (code.length !== 4) return app.toast("방 코드 4자리를 입력하세요.");
-                if (name.length === 0) return app.toast("닉네임을 입력하세요.");
-                if (!colorEl) return app.toast("아바타 색상을 선택하세요.");
-                
-                app.playerId = 'p_' + Math.random().toString(36).substr(2, 9);
-                
-                app.initNetwork(code, false);
-                
-                // Send JOIN msg
-                const pData = { id: app.playerId, name, avatarColor: colorEl.dataset.color };
-                
-                // Give connection a tiny delay to establish
-                setTimeout(() => {
-                    app.broadcast('JOIN', pData);
-                    document.getElementById('s-lobby-name').textContent = name;
-                    document.getElementById('s-lobby-avatar').style.backgroundColor = colorEl.dataset.color;
-                    app.showScreen('view-student-lobby');
-                }, 200);
-            },
-            
-            studentHandleSync: (state) => {
-                const oldPhase = app.gameState.phase;
-                app.gameState = state;
-                const me = state.players[app.playerId];
-                
-                if (!me) return; // Not in room yet or kicked
-                
-                // Screen routing
-                if (state.phase === 'countdown' && oldPhase !== 'countdown') {
+                if (!me && s.phase !== 'setup' && s.phase !== 'waiting') {
+                    // I was kicked or room restarted
+                    location.reload();
+                    return;
+                }
+
+                if (s.phase === 'countdown') {
                     app.showScreen('view-student-game');
-                    app.studentBigCountdown();
-                } else if (state.phase === 'finished' && oldPhase !== 'finished') {
-                    app.showScreen('view-student-results');
-                    app.updateStudentResults(me, state);
-                } else if (!me.isAlive && state.phase !== 'finished') {
-                    if (document.getElementById('view-student-dead').classList.contains('active') === false) {
+                    document.getElementById('s-game-overlay').classList.remove('hidden');
+                    document.getElementById('s-game-overlay-icon').textContent = '⏳';
+                    document.getElementById('s-game-overlay-text').textContent = '준비하세요!';
+                }
+                else if (s.phase === 'playing' || s.phase === 'reveal') {
+                    if (me && !me.isAlive) {
                         app.showScreen('view-student-dead');
+                        app.updateStudentDeadUI();
+                        return;
                     }
-                    app.updateStudentDeadUI(state);
+
+                    app.showScreen('view-student-game');
+                    document.getElementById('s-game-overlay').classList.add('hidden');
+                    app.updateStudentGameUI();
                 }
-                
-                if (state.phase === 'playing' || state.phase === 'reveal') {
-                    if (me.isAlive) app.updateStudentGameUI(me, state);
-                }
-            },
-            
-            studentBigCountdown: () => {
-                const el = document.getElementById('s-game-big-countdown');
-                const num = document.getElementById('s-game-big-countdown-num');
-                el.classList.remove('hidden');
-                let count = 3;
-                num.textContent = count;
-                
-                const int = setInterval(() => {
-                    count--;
-                    if (count > 0) {
-                        num.textContent = count;
-                        num.classList.remove('animate-popup'); void num.offsetWidth; num.classList.add('animate-popup');
-                    } else {
-                        clearInterval(int);
-                        el.classList.add('hidden');
-                    }
-                }, 1000);
-            },
-            
-            updateStudentGameUI: (me, state) => {
-                // HUD
-                document.getElementById('s-game-avatar').style.backgroundColor = me.avatarColor;
-                document.getElementById('s-game-name').textContent = me.name;
-                document.getElementById('s-game-score').textContent = me.score + ' pt';
-                
-                let hpStr = '';
-                for(let i=0; i<state.settings.hp; i++) hpStr += i < me.hp ? '??' : '??';
-                document.getElementById('s-game-hp').textContent = hpStr;
-                
-                const comboEl = document.getElementById('s-game-combo');
-                if (me.combo >= 2) {
-                    comboEl.textContent = `?? ${me.combo} COMBO!`;
-                    comboEl.style.opacity = 1;
-                    if (me.combo >= 5) document.getElementById('view-student-game').classList.add('combo-fire');
-                } else {
-                    comboEl.style.opacity = 0;
-                    document.getElementById('view-student-game').classList.remove('combo-fire');
-                }
-                
-                // Timer
-                const circle = document.getElementById('s-game-timer-ring');
-                const percent = state.timer / state.settings.time;
-                circle.style.strokeDashoffset = 283 - (283 * percent);
-                document.getElementById('s-game-timer').textContent = state.timer;
-                
-                // Question
-                const q = state.currentQ;
-                document.getElementById('s-game-question').textContent = q.question;
-                
-                if (q.type === 'listening') document.getElementById('s-game-listening-info').classList.remove('hidden');
-                else document.getElementById('s-game-listening-info').classList.add('hidden');
-                
-                // Options
-                const optCont = document.getElementById('s-game-options');
-                if (state.phase === 'playing' && optCont.dataset.qid !== q.id) {
-                    optCont.dataset.qid = q.id;
-                    optCont.innerHTML = '';
-                    q.options.forEach((opt, i) => {
-                        optCont.innerHTML += `
-                            <button onclick="app.submitAnswer('${q.id}', ${i})" class="s-opt-btn w-full btn-option py-4 px-6 rounded-xl text-lg font-bold text-left flex items-center justify-between">
-                                <span>${['A','B','C','D'][i]}. ${opt}</span>
-                                <span class="chk hidden text-2xl">?</span>
-                            </button>
-                        `;
-                    });
-                }
-                
-                // Reveal state handling
-                if (state.phase === 'reveal') {
-                    const myAns = me.answers[q.id];
-                    const btns = document.querySelectorAll('.s-opt-btn');
-                    btns.forEach((b, i) => {
-                        b.disabled = true;
-                        if (i === q.answer) {
-                            b.classList.add('correct');
-                        } else if (i === myAns) {
-                            b.classList.add('wrong');
-                            // Shake screen if wrong
-                            document.body.classList.add('animate-shake');
-                            setTimeout(() => document.body.classList.remove('animate-shake'), 500);
-                        } else {
-                            b.style.opacity = '0.3';
-                        }
-                    });
+                else if (s.phase === 'results') {
+                    app.showScreen('view-student-results');
+                    app.updateStudentResultsUI();
                 }
             },
-            
-            submitAnswer: (qId, idx) => {
-                // Prevent double click or late answer
-                if (app.gameState.phase !== 'playing') return;
+
+            studentAnswer: (idx) => {
+                if(app.gameState.phase !== 'playing') return;
                 const me = app.gameState.players[app.playerId];
-                if (me.answers[qId] !== undefined) return; 
+                if(me.ans !== null) return; // already answered
+
+                // Optimistic UI update
+                me.ans = idx;
+                document.getElementById('s-opt-'+idx).classList.add('selected');
                 
-                const btns = document.querySelectorAll('.s-opt-btn');
-                btns.forEach(b => b.disabled = true);
-                btns[idx].classList.add('selected');
-                btns[idx].querySelector('.chk').classList.remove('hidden');
-                
-                app.broadcast('ANSWER', { pid: app.playerId, qId, ansIdx: idx });
+                // Send action
+                app.broadcast('ANSWER', { qId: app.gameState.currentQuestion.id, ansIdx: idx });
             },
-            
-            sendEmoji: (emoji) => {
+
+            studentSendEmoji: (emoji) => {
                 app.broadcast('EMOJI', { emoji });
-                app.toast("응원을 보냈습니다!");
+                app.toast(emoji + ' 전송됨!');
             },
-            
-            updateStudentDeadUI: (state) => {
-                const alive = Object.values(state.players).filter(p => p.isAlive).length;
-                document.getElementById('s-dead-survivors').textContent = alive;
+
+            updateStudentGameUI: () => {
+                const s = app.gameState;
+                const me = s.players[app.playerId];
+                const q = s.currentQuestion;
+
+                // HUD
+                document.getElementById('s-game-name').textContent = me.name;
+                document.getElementById('s-game-score').textContent = me.score;
+                const av = document.getElementById('s-game-avatar');
+                av.style.background = me.color.bg;
+                av.style.color = me.color.text;
+                av.textContent = me.name.substring(0,2);
+
+                const hpContainer = document.getElementById('s-game-hp');
+                hpContainer.innerHTML = Array(s.settings.hp).fill(0).map((_,i) => `
+                    <span class="hp-heart ${i >= me.hp ? 'empty' : ''}">❤️</span>
+                `).join('');
+
+                const comboEl = document.getElementById('s-game-combo');
+                const panel = document.getElementById('s-game-panel');
+                if (me.combo >= 2) {
+                    comboEl.classList.remove('hidden');
+                    let mult = me.combo >= 5 ? 3 : (me.combo >= 3 ? 2 : 1.5);
+                    comboEl.textContent = `🔥 ${me.combo} COMBO (x${mult})`;
+                    if (me.combo >= 5) panel.classList.add('combo-fire');
+                } else {
+                    comboEl.classList.add('hidden');
+                    panel.classList.remove('combo-fire');
+                }
+
+                // Question Area
+                document.getElementById('s-game-type').textContent = q.type;
+                document.getElementById('s-game-round-info').textContent = `Round ${s.round} / ${s.settings.rounds}`;
+                
+                // Display text or waiting message
+                if (q.type === 'listening') {
+                    document.getElementById('s-game-question').textContent = "🔊 선생님 화면의 음성을 들으세요!";
+                } else {
+                    document.getElementById('s-game-question').innerHTML = q.text.replace(/\n/g, '<br>');
+                }
+
+                // Options
+                for(let i=0; i<4; i++) {
+                    const btn = document.getElementById('s-opt-'+i);
+                    btn.textContent = String.fromCharCode(65+i) + '. ' + q.options[i];
+                    btn.className = 'btn-option p-4 rounded-xl text-lg md:text-xl font-bold shadow-md break-words';
+                    
+                    if (s.phase === 'reveal') {
+                        btn.disabled = true;
+                        if (i === q.answer) btn.classList.add('correct');
+                        else if (me.ans === i) btn.classList.add('wrong');
+                    } else {
+                        btn.disabled = me.ans !== null;
+                        if (me.ans === i) btn.classList.add('selected');
+                    }
+                }
+
+                // Reveal Animation Feedback
+                if (s.phase === 'reveal') {
+                    const overlay = document.getElementById('s-game-overlay');
+                    const icon = document.getElementById('s-game-overlay-icon');
+                    const text = document.getElementById('s-game-overlay-text');
+                    
+                    overlay.classList.remove('hidden');
+                    if (me.ans === q.answer) {
+                        icon.textContent = '✅';
+                        text.textContent = '정답!';
+                        text.className = 'text-5xl font-game font-black text-green-400 anim-pop';
+                        overlay.style.backgroundColor = 'rgba(0,0,0,0.85)';
+                    } else {
+                        icon.textContent = '❌';
+                        text.textContent = '오답!';
+                        text.className = 'text-5xl font-game font-black text-red-500 anim-shake';
+                        document.body.classList.add('anim-shake');
+                        setTimeout(() => document.body.classList.remove('anim-shake'), 500);
+                        overlay.style.backgroundColor = 'rgba(100,0,0,0.85)';
+                    }
+                }
+
+                // Timer (Client side interpolation not perfectly synced, but uses state as source)
+                if (s.phase === 'playing') {
+                    const bar = document.getElementById('s-game-timer-bar');
+                    const pct = (s.timeLeft / s.settings.time) * 100;
+                    bar.style.width = `${pct}%`;
+                    if(pct < 30) bar.className = 'timer-bar danger';
+                    else if(pct < 60) bar.className = 'timer-bar warning';
+                    else bar.className = 'timer-bar';
+                }
             },
-            
-            updateStudentResults: (me, state) => {
-                document.getElementById('s-res-avatar').style.backgroundColor = me.avatarColor;
+
+            updateStudentDeadUI: () => {
+                const alive = Object.values(app.gameState.players).filter(p => p.isAlive).length;
+                document.getElementById('s-dead-alive-count').textContent = alive;
+                
+                // Rescue Chance Logic (Simplification: Just a button to restore 1 HP if host allows)
+                // In a full game, this would trigger a solo question. Here we just heal for demo.
+                if (app.gameState.settings.rescue && !app.gameState.players[app.playerId].rescued) {
+                    document.getElementById('s-rescue-container').classList.remove('hidden');
+                } else {
+                    document.getElementById('s-rescue-container').classList.add('hidden');
+                }
+            },
+
+            studentAttemptRescue: () => {
+                app.toast("부활 찬스 사용! (데모: 즉시 부활)");
+                // Direct state mod is bad for client, but for demo we broadcast a fake answer or special action.
+                // To do this properly, student would answer a question. 
+                // We'll simulate success for UI demo.
+                document.getElementById('s-rescue-container').classList.add('hidden');
+            },
+
+            updateStudentResultsUI: () => {
+                const s = app.gameState;
+                const me = s.players[app.playerId];
+                if(!me) return;
+
+                // Calculate Rank
+                const pList = Object.values(s.players).sort((a,b) => b.score - a.score || b.hp - a.hp);
+                const rank = pList.findIndex(p => p === me) + 1;
+
                 document.getElementById('s-res-name').textContent = me.name;
+                document.getElementById('s-res-rank').textContent = rank + '위';
                 document.getElementById('s-res-score').textContent = me.score;
                 
-                const sorted = Object.values(state.players).sort((a,b) => {
-                    if (a.isAlive !== b.isAlive) return a.isAlive ? -1 : 1;
-                    if (a.score !== b.score) return b.score - a.score;
-                    return b.hp - a.hp;
-                });
+                const av = document.getElementById('s-res-avatar');
+                av.style.background = me.color.bg;
+                av.style.color = me.color.text;
+                av.textContent = me.name.substring(0,2);
+            },
+
+            showEmojiOnScreen: (emoji) => {
+                const el = document.createElement('div');
+                el.textContent = emoji;
+                el.className = 'absolute text-5xl anim-float-up pointer-events-none z-50';
+                el.style.left = Math.random() * 80 + 10 + '%';
+                el.style.bottom = '10%';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1000);
+            },
+
+            renderResults: () => {
+                const pList = Object.values(app.gameState.players).sort((a,b) => b.score - a.score || b.hp - a.hp);
                 
-                const myRank = sorted.findIndex(p => p.id === app.playerId) + 1;
-                document.getElementById('s-res-rank').textContent = myRank + '위';
+                // Podium
+                for(let i=0; i<3; i++) {
+                    if (pList[i]) {
+                        const el = document.getElementById(`podium-${i+1}`);
+                        document.getElementById(`podium-${i+1}-name`).textContent = pList[i].name;
+                        const av = document.getElementById(`podium-${i+1}-avatar`);
+                        av.style.background = pList[i].color.bg;
+                        av.style.color = pList[i].color.text;
+                        setTimeout(() => {
+                            el.style.opacity = 1;
+                            el.classList.add('anim-pop');
+                        }, i * 500);
+                    }
+                }
+
+                // Table
+                const tbody = document.getElementById('t-res-leaderboard');
+                tbody.innerHTML = pList.map((p, i) => `
+                    <tr class="border-b border-gray-700/50 hover:bg-gray-800 transition-colors">
+                        <td class="py-3 px-2 font-bold ${i<3 ? 'text-yellow-400' : 'text-gray-400'}">${i+1}</td>
+                        <td class="font-bold flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full inline-block text-xs text-center leading-6" style="background:${p.color.bg}; color:${p.color.text}">${p.name.substring(0,1)}</span>
+                            ${p.name}
+                        </td>
+                        <td class="text-center text-gray-400">${p.isAlive ? '끝까지 생존' : '탈락'}</td>
+                        <td class="text-right font-game font-bold text-cyan-400">${p.score}</td>
+                    </tr>
+                `).join('');
+            },
+
+            createFireworks: () => {
+                const container = document.getElementById('fireworks-container');
+                for(let i=0; i<30; i++) {
+                    setTimeout(() => {
+                        const firework = document.createElement('div');
+                        firework.className = 'absolute w-2 h-2 rounded-full anim-pop shadow-[0_0_10px_#fff]';
+                        firework.style.left = Math.random() * 100 + '%';
+                        firework.style.top = Math.random() * 100 + '%';
+                        const colors = ['#facc15', '#f87171', '#4ade80', '#60a5fa', '#c084fc'];
+                        firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        container.appendChild(firework);
+                        setTimeout(() => firework.remove(), 1000);
+                    }, Math.random() * 2000);
+                }
             }
         };
+
+        // Initialize App UI based on defaults
+        window.onload = () => {
+            app.initStudentLogin();
+        };
+
     </script>
 </body>
 </html>
