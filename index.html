@@ -449,7 +449,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBuHd7prNT0ePPxTJxpt03GdvK69pEgM9I",
@@ -470,6 +470,7 @@
         window.fAuth = auth;
         window.fDoc = doc;
         window.fSetDoc = setDoc;
+        window.fGetDoc = getDoc;
         window.fOnSnapshot = onSnapshot;
         window.fAppId = typeof __app_id !== 'undefined' ? __app_id : 'engbattle';
 
@@ -489,8 +490,8 @@
     </script>
 
     <script>
-        // 40 Questions Data (Embedded JSON)
-        const questionsData = {
+        // Default 40 Questions Data (Fallback & Seeding)
+        const defaultQuestionsData = {
             "vocabulary": [
                 { id: "v1", question: "What does 'curious' mean?", options: ["행복한", "궁금한", "슬픈", "화난"], answer: 1, text: "'Curious' means wanting to know or learn something." },
                 { id: "v2", question: "Which word means '매우 큰'?", options: ["Tiny", "Small", "Huge", "Short"], answer: 2, text: "'Huge' means very large." },
@@ -541,6 +542,8 @@
                 { id: "r10", passage: "Elephants are very large animals with long trunks. They use their trunks to drink water and pick up food.", question: "What do elephants use their trunks for?", options: ["To run fast", "To fly", "To drink and pick up food", "To see better"], answer: 2, text: "지문: They use their trunks to drink water and pick up food." }
             ]
         };
+
+        let questionsData = null; // Firebase에서 불러온 데이터를 저장할 변수
 
         // Avatar Colors
         const colors = [
@@ -649,6 +652,26 @@
                 } catch(e) { console.error("Broadcast error", e); }
             },
 
+            loadQuestionBank: async () => {
+                if (!window.fDb) return;
+                // 문제은행이 저장될 Firebase 경로 지정
+                const bankRef = window.fDoc(window.fDb, 'artifacts', window.fAppId, 'public', 'data', 'question_bank', 'main');
+                try {
+                    const snap = await window.fGetDoc(bankRef);
+                    if (snap.exists()) {
+                        questionsData = snap.data().categories;
+                        console.log("Firebase에서 문제은행 로드 완료");
+                    } else {
+                        console.log("문제은행 초기화 중... (기본 40문제를 DB에 업로드합니다)");
+                        await window.fSetDoc(bankRef, { categories: defaultQuestionsData });
+                        questionsData = defaultQuestionsData;
+                    }
+                } catch(e) {
+                    console.error("문제은행 로드 실패, 기본 데이터 사용:", e);
+                    questionsData = defaultQuestionsData;
+                }
+            },
+
             // ==========================================
             // ==========================================
             initTeacherSetup: () => {
@@ -656,6 +679,8 @@
             },
 
             createRoom: () => {
+                if (!questionsData) return app.toast("문제은행을 불러오는 중입니다. 잠시만 기다려주세요.");
+                
                 const types = Array.from(document.querySelectorAll('.t-setup-type:checked')).map(cb => cb.value);
                 if (types.length === 0) return app.toast("최소 1개의 문제 유형을 선택하세요!");
                 
@@ -1285,8 +1310,18 @@
         };
 
         // Initialize App UI based on defaults
-        window.onload = () => {
+        window.onload = async () => {
             app.initStudentLogin();
+            
+            // Firebase가 연결될 때까지 대기 후 문제은행 로드
+            let checks = 0;
+            while(!window.fDb && checks < 20) {
+                await new Promise(r => setTimeout(r, 200));
+                checks++;
+            }
+            if(window.fDb) {
+                await app.loadQuestionBank();
+            }
         };
 
     </script>
